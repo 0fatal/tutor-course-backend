@@ -1,20 +1,26 @@
-import { EntityModel } from '@midwayjs/orm'
-import { Column, PrimaryColumn } from 'typeorm'
+import { EntityModel } from '@midwayjs/orm';
+import { Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @EntityModel('template_instance')
 export class TemplateInstance {
-  @PrimaryColumn()
-  id: string
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  type: number
+  type: number; // 0: docx 1:excel
 
   @Column()
-  templateId: string
+  templateId: string;
 
   @Column()
-  createAt: Date
+  tags: string;
 
   @Column()
-  updateAt: Date
+  staffId: string;
+
+  @Column()
+  createAt: Date;
+
+  @Column()
+  updateAt: Date;
 }

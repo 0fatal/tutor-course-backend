@@ -1,26 +1,23 @@
-import { EntityModel } from '@midwayjs/orm'
-import { Column, PrimaryColumn } from 'typeorm'
+import { EntityModel } from '@midwayjs/orm';
+import { Column, PrimaryColumn } from 'typeorm';
 
 @EntityModel('teacher')
 export class Teacher {
   @PrimaryColumn()
-  tid: string
+  staffId: string;
 
   @Column()
-  name: string
+  name: string;
 
   @Column()
-  username: string
+  password: string;
 
   @Column()
-  password: string
+  createAt: Date;
 
   @Column()
-  createAt: Date
+  updateAt: Date;
 
   @Column()
-  updateAt: Date
-
-  @Column()
-  isAdmin: boolean
+  isAdmin: boolean;
 }

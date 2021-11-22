@@ -2,40 +2,43 @@ import { InjectEntityModel } from '@midwayjs/orm';
 import { Teacher } from '../entity/teacher';
 import { Repository } from 'typeorm';
 import MD5 from 'crypto-js/md5';
-import { randomUUID } from 'crypto';
+import { RegistryTeacherDTO } from '../dto/teacher/teacher';
 
 export class TeacherService {
   @InjectEntityModel(Teacher)
   _teacherModel: Repository<Teacher>;
 
-  async getByUsernameAndPassword(
-    username: string,
+  async getByStaffIdAndPassword(
+    staffId: string,
     password: string
   ): Promise<Teacher> {
-    password = MD5(password);
+    password = MD5(password).toString();
     return await this._teacherModel.findOne({
       where: {
-        username,
+        staffId,
         password,
       },
     });
   }
 
-  async findByTid(tid: string): Promise<Teacher> {
-    return await this._teacherModel.findOne(tid);
+  async findByStaffId(staffId: string): Promise<Teacher> {
+    return await this._teacherModel.findOne(staffId);
   }
 
-  async registry(info: Teacher) {
+  async registry(info: RegistryTeacherDTO): Promise<boolean> {
     // eslint-disable-next-line prefer-const
-    let { username, password } = info;
-    const tid = randomUUID();
+    let { staffId, password, name } = info;
+    password = MD5(password).toString();
 
-    password = MD5(password);
-
-    await this._teacherModel.create({
-      tid,
-      username,
-      password,
-    });
+    if (
+      !(await this._teacherModel.create({
+        staffId,
+        password,
+        name,
+      }))
+    ) {
+      return false;
+    }
+    return true;
   }
 }
