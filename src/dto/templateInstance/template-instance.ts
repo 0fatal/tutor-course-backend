@@ -1,13 +1,24 @@
-import { TemplateType } from '../../service/template-instance';
+import { TemplateType } from '../../service/template-instance'
+import { Rule } from '@midwayjs/decorator'
+import { RuleType } from '@midwayjs/decorator/dist/annotation/rule'
 
-export interface NewTemplateInstanceDTO {
-  type: TemplateType;
-  templateId: string;
-  staffId: string;
-  tags: any;
+export class NewTemplateInstanceDTO {
+  type: TemplateType
+
+  @Rule(RuleType.string().length(36))
+  templateId: string
+
+  @Rule(RuleType.object())
+  tags: any
+
+  @Rule(RuleType.optional())
+  staffId: string
 }
 
-export interface UpdateTemplateInstanceDTO {
-  id: string;
-  tags: any;
+export class UpdateTemplateInstanceDTO {
+  @Rule(RuleType.string().length(36))
+  id: string
+
+  @Rule(RuleType.object())
+  tags: any
 }

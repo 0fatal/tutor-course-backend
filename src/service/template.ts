@@ -8,17 +8,18 @@ import { FileStream } from '../../typings/app'
 import { generaFileId, writeFileToDisk } from '../utils/common'
 import { Template } from './../entity/template'
 import { getDocxTags, loadDocxFile } from './../utils/doc'
+import { TemplateType } from './template-instance'
+import xlsx from 'xlsx'
 
 @Provide()
 export class TemplateService {
   @InjectEntityModel(Template)
   templateModel: Repository<Template>
 
-  async parseTemplate(
+  async uploadTemplate(
     file: FileStream
   ): Promise<[ifSuccess: boolean, res: any]> {
     const fid = generaFileId()
-
     const fileName = `${fid}.docx`
 
     const {
@@ -38,13 +39,11 @@ export class TemplateService {
       }
 
       try {
-        const tags = await this.processTags(fileDir)
         await this.templateModel.save(template)
         return [
           true,
           {
             fid,
-            tags,
           },
         ]
       } catch (e) {
@@ -222,6 +221,39 @@ export class TemplateService {
       return ifSuccess
     }
     return false
+  }
+
+  async downloadTemplate(iid: string) {}
+
+  async parseExcel(
+    fid: string,
+    file: FileStream
+  ): Promise<[ifSuccess: boolean, res: any]> {
+    const template = await this.templateModel.findOne({
+      where: {
+        fid,
+        type: TemplateType.EXCEL,
+      },
+    })
+
+    if (!template) return [false, null]
+
+    const doc = loadDocxFile(readFileSync(template.path, 'binary'))
+    const workbook = xlsx.read(file)
+    const data = xlsx.utils.sheet_to_json(
+      workbook.Sheets[workbook.SheetNames[0]]
+    )
+
+    doc.render(data)
+    const content = doc.getZip().generate({
+      type: 'nodebuffer',
+    })
+
+    const tmpPath = resolve('temp', template.filename)
+
+    writeFileSync(tmpPath, content)
+
+    return [true, tmpPath]
   }
 }
 
