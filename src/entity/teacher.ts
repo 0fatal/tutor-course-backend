@@ -1,23 +1,28 @@
-import { EntityModel } from '@midwayjs/orm';
-import { Column, PrimaryColumn } from 'typeorm';
+import { EntityModel } from '@midwayjs/orm'
+import {
+  Column,
+  CreateDateColumn,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @EntityModel('teacher')
 export class Teacher {
   @PrimaryColumn()
-  staffId: string;
+  staffId: string
 
   @Column()
-  name: string;
+  name: string
 
   @Column()
-  password: string;
+  password: string
 
-  @Column()
-  createAt: Date;
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createAt?: Date
 
-  @Column()
-  updateAt: Date;
+  @UpdateDateColumn({ type: 'timestamp', onUpdate: 'CURRENT_TIMESTAMP' })
+  updateAt?: Date
 
-  @Column()
-  isAdmin: boolean;
+  @Column({ type: 'tinyint' })
+  isAdmin: number
 }
