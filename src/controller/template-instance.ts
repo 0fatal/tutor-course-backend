@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Provide,
+  Validate,
 } from '@midwayjs/decorator'
 import { R } from '../utils/response'
 import { TemplateInstanceService } from '../service/template-instance'
@@ -18,6 +19,7 @@ import {
 } from '../dto/templateInstance/template-instance'
 import { Context } from 'egg'
 import { Teacher } from '../entity/teacher'
+import { createReadStream, statSync } from 'fs'
 
 @Provide()
 @Controller('/instance')
@@ -30,39 +32,74 @@ export class TemplateInstanceController {
 
   @Post('/new')
   async newInstance(@Body(ALL) data: NewTemplateInstanceDTO): Promise<R> {
-    const ok = this.templateInstanceService.newInstance(data)
-    if (!ok) return R.Fail().Msg('create new instance fail')
+    data.staffId = (this.ctx.teacher as Teacher).staffId
+    if (!data.staffId) return R.Fail().Msg('please relogin again')
+    const [ok, err] = await this.templateInstanceService.newInstance(data)
+    if (!ok)
+      return R.Fail().Msg(`create new instance fail: ${err || err.message}`)
     return R.Ok()
   }
 
   @Patch('/')
+  @Validate()
   async updateInstance(@Body(ALL) data: UpdateTemplateInstanceDTO): Promise<R> {
-    const ok = this.templateInstanceService.updateInstance(data)
-    if (!ok) return R.Fail().Msg('update fail')
+    if (typeof data.tags !== 'object') {
+      return R.Fail().Msg('wrong tags')
+    }
+    const [ok, err] = await this.templateInstanceService.updateInstance(data)
+    if (!ok) return R.Fail().Msg(err.message)
     return R.Ok()
   }
 
   @Get('/')
   async listInstances(): Promise<R> {
-    const data = this.templateInstanceService.getInstanceList(
+    const data = await this.templateInstanceService.getInstanceList(
       (this.ctx.teacher as Teacher).staffId
     )
+
     if (!data) return R.Fail().Msg('get list fail')
     return R.Ok().Data(data)
   }
 
   @Post('/copy/:id')
   async copyInstance(@Param('id') iid: string): Promise<R> {
-    const nid = this.templateInstanceService.copyInstance(iid)
+    const [ok, res] = await this.templateInstanceService.copyInstance(iid)
+    if (!ok) return R.Fail().Msg(res.message)
     return R.Ok().Data({
-      newInstanceId: nid,
+      newInstanceId: res,
     })
   }
 
   @Del('/:id')
   async delInstance(@Param('id') iid: string): Promise<R> {
-    const ok = this.templateInstanceService.delInstance(iid)
+    const ok = await this.templateInstanceService.delInstance(iid)
     if (!ok) return R.Fail().Msg('del fail')
     return R.Ok()
+  }
+
+  @Get('/:id')
+  async infoInstance(@Param('id') iid: string): Promise<R> {
+    const instance = await this.templateInstanceService.queryInstance(iid)
+    if (!instance) return R.Fail().Msg('instance not found')
+    return R.Ok().Data(instance)
+  }
+
+  @Get('/download/:id')
+  async downloadInstance(@Param('id') iid: string) {
+    const [ok, res] = await this.templateInstanceService.downloadInstance(iid)
+
+    if (!ok) return R.Fail().Msg(res.message)
+
+    this.ctx.attachment(iid, {
+      fallback: true,
+      type: 'attachment', // [string] attachment/inline
+    })
+    const stats = statSync(res)
+    this.ctx.response.set({
+      'Content-Type': 'application/octet-stream',
+      'Content-Disposition': `attachment; filename=${iid}`,
+      'Content-Length': stats.size.toString(),
+    })
+    this.ctx.body = createReadStream(res)
   }
 }
