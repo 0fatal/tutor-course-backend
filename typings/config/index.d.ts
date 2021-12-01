@@ -16,8 +16,7 @@ import 'egg-jsonp';
 import 'egg-view';
 import 'midway-schedule';
 import 'egg-cors';
-import {EggPluginItem} from 'egg';
-
+import { EggPluginItem } from 'egg';
 declare module 'egg' {
   interface EggPlugin {
     'onerror'?: EggPluginItem;
