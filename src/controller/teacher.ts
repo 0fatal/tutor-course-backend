@@ -5,6 +5,7 @@ import {
   Controller,
   Get,
   Inject,
+  Patch,
   Post,
   Provide,
   Validate,
@@ -12,13 +13,20 @@ import {
 import { R } from '../utils/response'
 import { ErrorType } from '../utils/errorType'
 import { Context } from 'egg'
-import { LoginDTO, RegistryTeacherDTO } from '../dto/teacher/teacher'
+import {
+  LoginDTO,
+  RegistryTeacherDTO,
+  UpdateTeacherDTO,
+} from '../dto/teacher/teacher'
 
 @Provide()
 @Controller('/teacher')
 export class TeacherController {
   @Inject()
   _teacherService: TeacherService
+
+  @Inject()
+  ctx: Context
 
   @Post('/login')
   @Validate()
@@ -29,10 +37,19 @@ export class TeacherController {
       password
     )
 
-    if (!teacher) return R.WrapError(ErrorType.UNAUTHORIZED)
+    if (!teacher) return R.WrapError(ErrorType.LOGIN_FAILED)
 
-    sessionStorage.setItem('teacher', JSON.stringify(teacher))
+    this.ctx.session.teacher = teacher
     return R.Ok().Msg('login success')
+  }
+
+  @Patch('/')
+  @Validate()
+  async setInfo(ctx: Context, @Body(ALL) data: UpdateTeacherDTO): Promise<R> {
+    const staffId = ctx['teacher'].staffId
+    const ok = await this._teacherService.updateInfo(staffId, data)
+    if (!ok) return R.Fail().Msg('update info fail')
+    return R.Ok()
   }
 
   @Get('/')
@@ -47,8 +64,8 @@ export class TeacherController {
   @Post('/registry')
   @Validate()
   async registry(@Body(ALL) data: RegistryTeacherDTO): Promise<R> {
-    const ok = await this._teacherService.registry(data)
-    if (!ok) return R.Fail().Msg('registry fail')
+    const [ok, err] = await this._teacherService.registry(data)
+    if (!ok) return R.Fail().Msg(err ?? 'registry fail')
     return R.Ok()
   }
 }
