@@ -20,7 +20,7 @@ export default (appInfo: EggAppInfo) => {
   config.keys = appInfo.name + '_1635940289211_8649'
 
   // add your config here
-  config.middleware = []
+  config.middleware = ['authMiddleware', 'errorMiddleware']
 
   config.midwayFeature = {
     // true 代表使用 midway logger
@@ -40,8 +40,9 @@ export default (appInfo: EggAppInfo) => {
 
   config.cors = {
     // {string|Function} origin: '*',
-    origin: '*',
+    origin: 'http://localhost:8081',
     // {string|Array} allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
+    credentials: true,
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
   }
 
