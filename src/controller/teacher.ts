@@ -11,13 +11,13 @@ import {
   Validate,
 } from '@midwayjs/decorator'
 import { R } from '../utils/response'
-import { ErrorType } from '../utils/errorType'
 import { Context } from 'egg'
 import {
   LoginDTO,
   RegistryTeacherDTO,
   UpdateTeacherDTO,
 } from '../dto/teacher/teacher'
+import { TeacherErrorMap } from '../errorType/teacher'
 
 @Provide()
 @Controller('/teacher')
@@ -37,7 +37,7 @@ export class TeacherController {
       password
     )
 
-    if (!teacher) return R.WrapError(ErrorType.LOGIN_FAILED)
+    if (!teacher) return R.WrapError(TeacherErrorMap['LOGIN_FAILED'])
 
     this.ctx.session.teacher = teacher
     return R.Ok().Msg('login success')
@@ -56,7 +56,7 @@ export class TeacherController {
   async getInfo(ctx: Context): Promise<R> {
     const staffId = ctx['teacher'].staffId
     const teacher = await this._teacherService.findByStaffId(staffId)
-    if (!teacher) return R.WrapError(ErrorType.UNAUTHORIZED)
+    if (!teacher) return R.WrapError(TeacherErrorMap['LOGIN_FAILED'])
 
     return R.Ok().Data(teacher)
   }
