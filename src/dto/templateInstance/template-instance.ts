@@ -13,6 +13,9 @@ export class NewTemplateInstanceDTO {
 
   @Rule(RuleType.optional())
   staffId: string
+
+  @Rule(RuleType.string().length(36))
+  courseId: string
 }
 
 export class UpdateTemplateInstanceDTO {
@@ -21,4 +24,7 @@ export class UpdateTemplateInstanceDTO {
 
   @Rule(RuleType.object())
   tags: any
+
+  @Rule(RuleType.options().string().length(36))
+  courseId: string
 }
