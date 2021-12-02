@@ -9,7 +9,7 @@ import {
 @EntityModel('course')
 export class Course {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  courseId: string
 
   @Column({
     type: 'varchar',
@@ -18,7 +18,7 @@ export class Course {
     comment: '课程号',
     unique: true,
   })
-  courseId: string
+  courseNum: string
 
   @Column({ type: 'varchar', length: 32, nullable: false, comment: '课程名称' })
   courseName: string
