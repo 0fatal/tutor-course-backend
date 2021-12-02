@@ -28,4 +28,7 @@ export class TemplateInstance {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updateAt: Date
+
+  @Column({ type: 'varchar', length: 36 })
+  courseId: string
 }
