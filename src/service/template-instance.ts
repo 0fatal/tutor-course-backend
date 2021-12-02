@@ -74,8 +74,21 @@ export class TemplateInstanceService {
   async updateInstance({
     id: instanceId,
     tags,
+    courseId,
   }: UpdateTemplateInstanceDTO): Promise<[boolean, any]> {
     try {
+      if (courseId) {
+        const course = await this.templateModel.findOne(courseId)
+        if (!course) {
+          return [false, new Error('course not found')]
+        }
+
+        await this.templateInstanceModel.update(instanceId, {
+          tags: JSON.stringify(tags),
+          courseId,
+        })
+      }
+
       await this.templateInstanceModel.update(instanceId, {
         tags: JSON.stringify(tags),
       })
