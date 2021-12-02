@@ -2,17 +2,21 @@ import { EntityModel } from '@midwayjs/orm'
 import {
   Column,
   CreateDateColumn,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
 
 @EntityModel('course')
 export class Course {
-  @PrimaryColumn({
+  @PrimaryGeneratedColumn('uuid')
+  id: string
+
+  @Column({
     type: 'varchar',
     length: 10,
     nullable: false,
     comment: '课程号',
+    unique: true,
   })
   courseId: string
 
