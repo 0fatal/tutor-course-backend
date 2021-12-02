@@ -29,12 +29,18 @@ export class TemplateInstanceService {
     templateId,
     tags,
     staffId,
+    courseId,
     type,
   }: NewTemplateInstanceDTO): Promise<[boolean, any]> {
     try {
       const template = await this.templateModel.findOne(templateId)
       if (!template) {
         return [false, new Error('template not found')]
+      }
+
+      const course = await this.templateModel.findOne(courseId)
+      if (!course) {
+        return [false, new Error('course not found')]
       }
 
       let instance = new TemplateInstance()
