@@ -51,8 +51,8 @@ export class TemplateController {
   }
 
   @Get('/')
-  async list(): Promise<R> {
-    return R.Ok().Data(await this._templateService.getTemplateList())
+  async list(@Query('course_id') courseId: string): Promise<R> {
+    return R.Ok().Data(await this._templateService.getTemplateList(courseId))
   }
 
   @Get('/:fid')

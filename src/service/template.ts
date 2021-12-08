@@ -98,11 +98,15 @@ export class TemplateService {
     // }
   }
 
-  async getTemplateList(): Promise<TemplateList> {
+  async getTemplateList(courseId?: string): Promise<TemplateList> {
+    console.log(courseId)
     return (
       await this.templateModel.find({
         order: {
           createAt: 'DESC',
+        },
+        where: courseId && {
+          courseId,
         },
       })
     ).map(({ fid, filename, createAt }) => ({
