@@ -11,3 +11,11 @@ export class UpdateCourseDTO {
   @Rule(RuleType.string().optional())
   courseName: string
 }
+
+export class NewCourseDTO {
+  @Rule(RuleType.string().min(6).max(10).required())
+  courseNum: string
+
+  @Rule(RuleType.string().max(32).required())
+  courseName: string
+}

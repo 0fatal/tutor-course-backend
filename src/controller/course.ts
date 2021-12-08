@@ -6,11 +6,13 @@ import {
   Inject,
   Param,
   Patch,
+  Post,
   Provide,
 } from '@midwayjs/decorator'
 import { Context } from '@midwayjs/web'
 import { CourseService } from '../service/course'
 import { R } from '../utils/response'
+import { NewCourseDTO } from '../dto/course/course'
 
 @Provide()
 @Controller('/course')
@@ -37,5 +39,11 @@ export class CourseController {
   async getCourse(@Param('cid') cid): Promise<R> {
     const course = await this.courseService.findByCourseId(cid)
     return R.Ok().Data(course)
+  }
+
+  @Post('/')
+  async newCourse(@Body(ALL) course: NewCourseDTO): Promise<R> {
+    await this.courseService.newCourse(course)
+    return R.Ok()
   }
 }
