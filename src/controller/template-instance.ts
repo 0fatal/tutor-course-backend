@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Provide,
+  Query,
   Validate,
 } from '@midwayjs/decorator'
 import { R } from '../utils/response'
@@ -52,9 +53,16 @@ export class TemplateInstanceController {
   }
 
   @Get('/')
-  async listInstances(): Promise<R> {
+  async listInstances(
+    @Query('course_id') courseId,
+    @Query('template_id') templateId
+  ): Promise<R> {
     const data = await this.templateInstanceService.getInstanceList(
-      (this.ctx.teacher as Teacher).staffId
+      (this.ctx.teacher as Teacher).staffId,
+      {
+        courseId,
+        templateId,
+      }
     )
 
     if (!data) return R.Fail().Msg('get list fail')

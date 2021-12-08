@@ -5,6 +5,7 @@ import { Repository } from 'typeorm'
 import { TemplateInstance } from '../entity/template-instance'
 import {
   NewTemplateInstanceDTO,
+  QueryTemplateInstanceDTO,
   UpdateTemplateInstanceDTO,
 } from '../dto/templateInstance/template-instance'
 import { loadDocxFile } from '../utils/doc'
@@ -12,11 +13,13 @@ import { readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
 import { FileStream } from '../../typings/app'
 import xlsx from 'xlsx'
+import { Course } from '../entity/course'
 
 export enum TemplateType {
   DOCX,
   EXCEL,
 }
+
 @Provide()
 export class TemplateInstanceService {
   @InjectEntityModel(Template)
@@ -24,6 +27,9 @@ export class TemplateInstanceService {
 
   @InjectEntityModel(TemplateInstance)
   templateInstanceModel: Repository<TemplateInstance>
+
+  @InjectEntityModel(Course)
+  courseModel: Repository<Course>
 
   async newInstance({
     templateId,
@@ -103,13 +109,59 @@ export class TemplateInstanceService {
     return instance
   }
 
-  async getInstanceList(staffId: string): Promise<TemplateInstance[]> {
-    const instances = await this.templateInstanceModel.find({
-      where: {
-        staffId,
-      },
-      select: ['id', 'templateId', 'type'],
-    })
+  async getInstanceList(
+    staffId: string,
+    { templateId, courseId }: { templateId?: string; courseId?: string } = {}
+  ): Promise<QueryTemplateInstanceDTO[]> {
+    let instances
+    if (templateId && courseId) {
+      instances = await this.templateInstanceModel.find({
+        where: {
+          staffId,
+          templateId,
+          courseId,
+        },
+        select: ['id', 'templateId', 'type'],
+      })
+    } else if (courseId) {
+      instances = await this.templateInstanceModel.find({
+        where: {
+          staffId,
+          courseId,
+        },
+        select: ['id', 'templateId', 'type'],
+      })
+    } else if (templateId) {
+      instances = await this.templateInstanceModel.find({
+        where: {
+          staffId,
+          templateId,
+        },
+        select: ['id', 'templateId', 'type'],
+      })
+    } else {
+      instances = await this.templateInstanceModel.find({
+        where: {
+          staffId,
+        },
+        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+      })
+    }
+
+    if (instances && instances.length > 0) {
+      for (let i = 0; i < instances.length; i++) {
+        const instance = instances[i]
+        const { filename } = await this.templateModel.findOne(
+          instance.templateId
+        )
+        const { courseName } = await this.courseModel.findOne(instance.courseId)
+        instances[i] = {
+          ...instance,
+          templateName: filename,
+          courseName,
+        }
+      }
+    }
     return instances
   }
 

@@ -25,6 +25,16 @@ export class UpdateTemplateInstanceDTO {
   @Rule(RuleType.object())
   tags: any
 
-  @Rule(RuleType.options().string().length(36))
+  @Rule(RuleType.string().optional().length(36))
   courseId: string
+}
+
+export class QueryTemplateInstanceDTO {
+  id: string
+  templateId: string
+  templateName: string
+  courseName: string
+  courseId: string
+  type: number
+  updateAt: Date
 }
