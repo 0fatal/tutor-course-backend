@@ -14,8 +14,8 @@ export class NewTemplateInstanceDTO {
   @Rule(RuleType.optional())
   staffId: string
 
-  @Rule(RuleType.string().length(36))
-  courseId: string
+  // @Rule(RuleType.string().length(36))
+  // courseId: string
 }
 
 export class UpdateTemplateInstanceDTO {

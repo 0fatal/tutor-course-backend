@@ -35,7 +35,7 @@ export class TemplateInstanceService {
     templateId,
     tags,
     staffId,
-    courseId,
+    // courseId,
     type,
   }: NewTemplateInstanceDTO): Promise<[boolean, any]> {
     try {
@@ -44,10 +44,10 @@ export class TemplateInstanceService {
         return [false, new Error('template not found')]
       }
 
-      const course = await this.templateModel.findOne(courseId)
-      if (!course) {
-        return [false, new Error('course not found')]
-      }
+      // const course = await this.templateModel.findOne(courseId)
+      // if (!course) {
+      //   return [false, new Error('course not found')]
+      // }
 
       let instance = new TemplateInstance()
       instance = {
@@ -121,7 +121,7 @@ export class TemplateInstanceService {
           templateId,
           courseId,
         },
-        select: ['id', 'templateId', 'type'],
+        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     } else if (courseId) {
       instances = await this.templateInstanceModel.find({
@@ -129,7 +129,7 @@ export class TemplateInstanceService {
           staffId,
           courseId,
         },
-        select: ['id', 'templateId', 'type'],
+        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     } else if (templateId) {
       instances = await this.templateInstanceModel.find({
@@ -137,7 +137,7 @@ export class TemplateInstanceService {
           staffId,
           templateId,
         },
-        select: ['id', 'templateId', 'type'],
+        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     } else {
       instances = await this.templateInstanceModel.find({
