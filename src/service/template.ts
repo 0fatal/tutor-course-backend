@@ -10,6 +10,9 @@ import { Template } from './../entity/template'
 import { getDocxTags, loadDocxFile } from './../utils/doc'
 import { TemplateType } from './template-instance'
 import xlsx from 'xlsx'
+import { Teacher } from '../entity/teacher'
+import { Course } from '../entity/course'
+import dayjs from 'dayjs'
 
 @Provide()
 export class TemplateService {
@@ -121,15 +124,27 @@ export class TemplateService {
     return [template.filename, template.path]
   }
 
-  async getTags(fid: string): Promise<any> {
+  async getTags(fid: string, tid: string): Promise<any> {
     const template = await this.templateModel.findOne(fid)
-    return await this.processTags(template.path)
+    return await this.processTags(template.path, tid, template.courseId)
   }
 
-  async processTags(templatePath: string) {
+  async processTags(
+    templatePath: string,
+    tid: string,
+    cid: string
+  ): Promise<any> {
     let tags = await getDocxTags(
       loadDocxFile(readFileSync(templatePath, 'binary'))
     )
+
+    // TODO 常量变换，不依赖于身份
+    // TODO 变量变换，依赖于角色
+    // teacherName courseName courseCode nature
+    // TODO 计算属性
+    // TODO 预设变量
+    // beginSchoolYear endSchoolYear editTime填表时间
+
     for (const key of Object.keys(tags)) {
       const v = tags[key]
       if (Object.keys(v).length === 0) {
@@ -143,73 +158,102 @@ export class TemplateService {
         tags[key] = arr
       }
     }
-    tags = this._innerTagReplace(tags)
+    tags = await this._innerBaseTagsReplace(tags)
+    tags = await this._infoBaseTagsReplace(tags, tid, cid)
     console.log(tags)
     return tags
   }
 
-  _innerTagReplace(tags): any {
+  async _innerBaseTagsReplace(tags: any): Promise<any> {
     const replaceMap = {
-      beginSchoolYear: () => {
+      beginSchoolYear() {
         const date = new Date()
         if (date.getMonth() >= 9) {
           return date.getFullYear()
         }
         return date.getFullYear() - 1
       },
-      endSchoolYear: () => {
+
+      endSchoolYear() {
         const date = new Date()
         if (date.getMonth() >= 9) {
           return date.getFullYear() + 1
         }
         return date.getFullYear()
       },
-      totalHours: tags => {
-        let totalHours = 0
-        for (const key of Object.keys(tags)) {
-          if (key !== 'totalHours' && key.match(/.*?Hours$/)) {
-            const hours = Number(tags[key])
-            if (!isNaN(hours) && hours > 0) {
-              totalHours += hours
-            }
-          }
+
+      semester() {
+        const date = new Date()
+        if (date.getMonth() >= 9) {
+          return 1
         }
-        return totalHours
+        return 0
       },
-      totalScore: tags => {
-        let totalScore = 0
-        for (const key of Object.keys(tags)) {
-          if (key !== 'totalScore' && key.match(/.*?Score$/)) {
-            const score = Number(tags[key])
-            if (!isNaN(score) && score > 0) {
-              totalScore += score
-            }
-          }
-        }
-        return totalScore
-      },
-      number: tag => {
-        for (const [v, idx] of tag) {
-          if (v.hasOwnProperty('number')) {
-            v['number'] = idx + 1
-          }
-        }
+
+      editTime() {
+        return dayjs().format('YYYY-MM-DD')
       },
     }
-
-    for (const key of Object.keys(tags)) {
-      let v = tags[key]
-      // if(typeof v === 'object') {
-      //   replaceMap['number'](v)
-      // }
-      if (replaceMap.hasOwnProperty(key)) {
-        v = replaceMap[key](tags)
+    const keys = Object.keys(tags)
+    for (const [k, v] of Object.entries(replaceMap)) {
+      if (keys.includes(k)) {
+        tags[k] = v()
       }
-      tags[key] = v
     }
-
     return tags
   }
+
+  @InjectEntityModel(Teacher)
+  private teacherRepository: Repository<Teacher>
+  @InjectEntityModel(Course)
+  private courseRepository: Repository<Course>
+
+  // 基于身份信息的变量替换
+  async _infoBaseTagsReplace(
+    tags: any,
+    tid: string,
+    cid: string
+  ): Promise<any> {
+    const teacher = await this.teacherRepository.findOne(tid)
+    const course = await this.courseRepository.findOne(cid)
+
+    const replaceMap = {
+      teacherName() {
+        return teacher.name
+      },
+
+      courseName() {
+        return course.courseName
+      },
+
+      courseCode() {
+        let beginSchoolYear: number
+        let endSchoolYear: number
+        let semester: number
+        const date = new Date()
+        if (date.getMonth() >= 9) {
+          beginSchoolYear = date.getFullYear()
+          semester = 1
+        } else {
+          beginSchoolYear = date.getFullYear() - 1
+          semester = 2
+        }
+
+        endSchoolYear = beginSchoolYear + 1
+
+        return `(${beginSchoolYear}-${endSchoolYear}-${semester})-${course.courseNum}-`
+      },
+    }
+    const keys = Object.keys(tags)
+    for (const [k, v] of Object.entries(replaceMap)) {
+      if (keys.includes(k)) {
+        tags[k] = v()
+      }
+    }
+    return tags
+  }
+
+  _infoBase
 
   async deleteTemplate(fid: string): Promise<boolean> {
     const template = await this.templateModel.findOne(fid)

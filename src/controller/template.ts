@@ -14,12 +14,16 @@ import { Context } from '@midwayjs/web'
 import { createReadStream, statSync } from 'fs'
 import { R } from '../utils/response'
 import { TemplateService } from '../service/template'
+import { Teacher } from '../entity/teacher'
 
 @Provide()
 @Controller('/template')
 export class TemplateController {
   @Inject()
   _templateService: TemplateService
+
+  @Inject()
+  ctx: Context
 
   @Post('/parse')
   async parse(ctx: Context): Promise<R> {
@@ -80,6 +84,11 @@ export class TemplateController {
 
   @Get('/tags')
   async getTags(@Query('fid') fid: string): Promise<R> {
-    return R.Ok().Data(await this._templateService.getTags(fid))
+    return R.Ok().Data(
+      await this._templateService.getTags(
+        fid,
+        (this.ctx.teacher as Teacher).staffId
+      )
+    )
   }
 }
