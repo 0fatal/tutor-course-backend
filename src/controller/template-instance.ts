@@ -13,7 +13,10 @@ import {
   Validate,
 } from '@midwayjs/decorator'
 import { R } from '../utils/response'
-import { TemplateInstanceService } from '../service/template-instance'
+import {
+  TemplateInstanceService,
+  TemplateType,
+} from '../service/template-instance'
 import {
   NewTemplateInstanceDTO,
   UpdateTemplateInstanceDTO,
@@ -35,6 +38,18 @@ export class TemplateInstanceController {
   async newInstance(@Body(ALL) data: NewTemplateInstanceDTO): Promise<R> {
     data.staffId = (this.ctx.teacher as Teacher).staffId
     if (!data.staffId) return R.Fail().Msg('please relogin again')
+    if (data.type === TemplateType.EXCEL) {
+      const file = await this.ctx.getFileStream()
+      const [ok, err] =
+        await this.templateInstanceService.uploadExcelAndSaveToInstance(
+          data.templateId,
+          data.staffId,
+          file
+        )
+      if (!ok)
+        return R.Fail().Msg(`create new instance fail: ${err || err.message}`)
+      return R.Ok()
+    }
     const [ok, err] = await this.templateInstanceService.newInstance(data)
     if (!ok)
       return R.Fail().Msg(`create new instance fail: ${err || err.message}`)

@@ -120,6 +120,7 @@ export class TemplateInstanceService {
           staffId,
           templateId,
           courseId,
+          type: TemplateType.DOCX,
         },
         select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
       })
@@ -128,6 +129,7 @@ export class TemplateInstanceService {
         where: {
           staffId,
           courseId,
+          type: TemplateType.DOCX,
         },
         select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
       })
@@ -136,6 +138,7 @@ export class TemplateInstanceService {
         where: {
           staffId,
           templateId,
+          type: TemplateType.DOCX,
         },
         select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
       })
@@ -143,6 +146,7 @@ export class TemplateInstanceService {
       instances = await this.templateInstanceModel.find({
         where: {
           staffId,
+          type: TemplateType.DOCX,
         },
         select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
       })
@@ -202,10 +206,71 @@ export class TemplateInstanceService {
     return [true, tmpPath]
   }
 
+  async listEXCELInstance(
+    staffId: string,
+    { templateId, courseId }: { templateId?: string; courseId?: string } = {}
+  ): Promise<QueryTemplateInstanceDTO[]> {
+    let instances
+    if (templateId && courseId) {
+      instances = await this.templateInstanceModel.find({
+        where: {
+          staffId,
+          templateId,
+          courseId,
+          type: TemplateType.EXCEL,
+        },
+        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+      })
+    } else if (courseId) {
+      instances = await this.templateInstanceModel.find({
+        where: {
+          staffId,
+          courseId,
+          type: TemplateType.EXCEL,
+        },
+        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+      })
+    } else if (templateId) {
+      instances = await this.templateInstanceModel.find({
+        where: {
+          staffId,
+          templateId,
+          type: TemplateType.EXCEL,
+        },
+        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+      })
+    } else {
+      instances = await this.templateInstanceModel.find({
+        where: {
+          staffId,
+          type: TemplateType.EXCEL,
+        },
+        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+      })
+    }
+
+    if (instances && instances.length > 0) {
+      for (let i = 0; i < instances.length; i++) {
+        const instance = instances[i]
+        const { filename } = await this.templateModel.findOne(
+          instance.templateId
+        )
+        const { courseName } = await this.courseModel.findOne(instance.courseId)
+        instances[i] = {
+          ...instance,
+          templateName: filename,
+          courseName,
+        }
+      }
+    }
+    return instances
+  }
+
   async uploadExcelAndSaveToInstance(
     fid: string,
+    staffId: string,
     file: FileStream
-  ): Promise<[boolean, string]> {
+  ): Promise<[boolean, any]> {
     const template = await this.templateModel.findOne({
       where: {
         fid,
@@ -215,21 +280,28 @@ export class TemplateInstanceService {
 
     if (!template) return [false, null]
 
-    const doc = loadDocxFile(readFileSync(template.path, 'binary'))
+    // const doc = loadDocxFile(readFileSync(template.path, 'binary'))
     const workbook = xlsx.read(file)
     const data = xlsx.utils.sheet_to_json(
       workbook.Sheets[workbook.SheetNames[0]]
     )
 
-    doc.render(data)
-    const content = doc.getZip().generate({
-      type: 'nodebuffer',
+    return await this.newInstance({
+      type: TemplateType.EXCEL,
+      tags: data,
+      templateId: fid,
+      staffId,
     })
 
-    const tmpPath = resolve('temp', template.filename)
+    // doc.render(data)
+    // const content = doc.getZip().generate({
+    //   type: 'nodebuffer',
+    // })
+    //
+    // const tmpPath = resolve('temp', template.filename)
+    //
+    // writeFileSync(tmpPath, content)
 
-    writeFileSync(tmpPath, content)
-
-    return [true, tmpPath]
+    // return [true, tmpPath]
   }
 }

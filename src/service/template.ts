@@ -108,9 +108,37 @@ export class TemplateService {
         order: {
           createAt: 'DESC',
         },
-        where: courseId && {
-          courseId,
+        where: Object.assign(
+          { type: TemplateType.DOCX },
+          courseId
+            ? {
+                courseId,
+              }
+            : {}
+        ),
+      })
+    ).map(({ fid, filename, createAt }) => ({
+      fid,
+      filename,
+      createAt,
+    })) as TemplateList
+  }
+
+  async getEXCELTemplateList(courseId?: string): Promise<TemplateList> {
+    console.log(courseId)
+    return (
+      await this.templateModel.find({
+        order: {
+          createAt: 'DESC',
         },
+        where: Object.assign(
+          { type: TemplateType.EXCEL },
+          courseId
+            ? {
+                courseId,
+              }
+            : {}
+        ),
       })
     ).map(({ fid, filename, createAt }) => ({
       fid,

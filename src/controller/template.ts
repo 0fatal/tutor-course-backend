@@ -59,6 +59,13 @@ export class TemplateController {
     return R.Ok().Data(await this._templateService.getTemplateList(courseId))
   }
 
+  @Get('/excel')
+  async listExcel(@Query('course_id') courseId: string): Promise<R> {
+    return R.Ok().Data(
+      await this._templateService.getEXCELTemplateList(courseId)
+    )
+  }
+
   @Get('/:fid')
   async getTemplate(ctx: Context, @Param('fid') fid: string) {
     const [filename, filepath] = await this._templateService.getTemplate(fid)
