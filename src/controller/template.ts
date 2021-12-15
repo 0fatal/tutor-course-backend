@@ -26,9 +26,12 @@ export class TemplateController {
   ctx: Context
 
   @Post('/parse')
-  async parse(ctx: Context): Promise<R> {
+  async parse(ctx: Context, @Query('type') templateType: string): Promise<R> {
     const file = await ctx.getFileStream()
-    const [ifSuccess, res] = await this._templateService.uploadTemplate(file)
+    const [ifSuccess, res] = await this._templateService.uploadTemplate(
+      file,
+      templateType === '1' ? 1 : 0
+    )
 
     return ifSuccess ? R.Ok().Data(res) : R.Fail().Msg(res.message)
   }

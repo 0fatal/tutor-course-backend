@@ -20,7 +20,8 @@ export class TemplateService {
   templateModel: Repository<Template>
 
   async uploadTemplate(
-    file: FileStream
+    file: FileStream,
+    templateType: number
   ): Promise<[ifSuccess: boolean, res: any]> {
     const fid = generaFileId()
     const fileName = `${fid}.docx`
@@ -30,7 +31,6 @@ export class TemplateService {
       error,
       fileDir,
     } = await writeFileToDisk(fileName, file)
-
     if (writeResType) {
       let template = new Template()
       template = {
@@ -39,6 +39,7 @@ export class TemplateService {
         filename: file.filename,
         path: fileDir,
         createAt: new Date(),
+        type: templateType,
       }
 
       try {
@@ -280,8 +281,6 @@ export class TemplateService {
     }
     return tags
   }
-
-  _infoBase
 
   async deleteTemplate(fid: string): Promise<boolean> {
     const template = await this.templateModel.findOne(fid)

@@ -14,4 +14,7 @@ export class Template {
   createAt: Date
   @Column()
   courseId: string
+
+  @Column()
+  type: number
 }
