@@ -80,7 +80,9 @@ export class TemplateController {
     const stats = statSync(filepath)
     ctx.response.set({
       'Content-Type': 'application/octet-stream',
-      'Content-Disposition': `attachment; filename=${filename}`,
+      'Content-Disposition': `attachment; filename=${encodeURIComponent(
+        filename
+      )};filename*=utf-8''${encodeURIComponent(filename)}"`,
       'Content-Length': stats.size.toString(),
     })
     ctx.body = createReadStream(filepath)
