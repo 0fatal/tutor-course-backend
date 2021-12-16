@@ -37,6 +37,7 @@ export class TemplateInstanceService {
     tags,
     staffId,
     // courseId,
+    name,
     type,
   }: NewTemplateInstanceDTO): Promise<[boolean, any]> {
     try {
@@ -56,6 +57,7 @@ export class TemplateInstanceService {
         type,
         templateId,
         staffId,
+        name,
         tags: JSON.stringify(tags),
       }
 
@@ -81,6 +83,7 @@ export class TemplateInstanceService {
   async updateInstance({
     id: instanceId,
     tags,
+    name,
     courseId,
   }: UpdateTemplateInstanceDTO): Promise<[boolean, any]> {
     try {
@@ -92,12 +95,14 @@ export class TemplateInstanceService {
 
         await this.templateInstanceModel.update(instanceId, {
           tags: JSON.stringify(tags),
+          name,
           courseId,
         })
       }
 
       await this.templateInstanceModel.update(instanceId, {
         tags: JSON.stringify(tags),
+        name,
       })
     } catch (e: any) {
       return [false, e]
@@ -123,7 +128,7 @@ export class TemplateInstanceService {
           courseId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     } else if (courseId) {
       instances = await this.templateInstanceModel.find({
@@ -132,7 +137,7 @@ export class TemplateInstanceService {
           courseId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     } else if (templateId) {
       instances = await this.templateInstanceModel.find({
@@ -141,7 +146,7 @@ export class TemplateInstanceService {
           templateId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     } else {
       instances = await this.templateInstanceModel.find({
@@ -149,7 +154,7 @@ export class TemplateInstanceService {
           staffId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     }
 
@@ -221,7 +226,7 @@ export class TemplateInstanceService {
           courseId,
           type: TemplateType.EXCEL,
         },
-        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     } else if (courseId) {
       instances = await this.templateInstanceModel.find({
@@ -230,7 +235,7 @@ export class TemplateInstanceService {
           courseId,
           type: TemplateType.EXCEL,
         },
-        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     } else if (templateId) {
       instances = await this.templateInstanceModel.find({
@@ -239,7 +244,7 @@ export class TemplateInstanceService {
           templateId,
           type: TemplateType.EXCEL,
         },
-        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     } else {
       instances = await this.templateInstanceModel.find({
@@ -247,7 +252,7 @@ export class TemplateInstanceService {
           staffId,
           type: TemplateType.EXCEL,
         },
-        select: ['id', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
       })
     }
 
@@ -300,6 +305,7 @@ export class TemplateInstanceService {
       type: TemplateType.EXCEL,
       tags: { clints: data },
       templateId: fid,
+      name: file.filename,
       staffId,
     })
 

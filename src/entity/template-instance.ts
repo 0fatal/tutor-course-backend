@@ -31,4 +31,7 @@ export class TemplateInstance {
 
   @Column({ type: 'varchar', length: 36 })
   courseId: string
+
+  @Column({ type: 'varchar', length: 64 })
+  name: string
 }

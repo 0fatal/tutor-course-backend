@@ -14,6 +14,8 @@ export class NewTemplateInstanceDTO {
   @Rule(RuleType.optional())
   staffId: string
 
+  @Rule(RuleType.string().min(2).max(64))
+  name: string
   // @Rule(RuleType.string().length(36))
   // courseId: string
 }
@@ -27,6 +29,9 @@ export class UpdateTemplateInstanceDTO {
 
   @Rule(RuleType.string().optional().length(36))
   courseId: string
+
+  @Rule(RuleType.string().optional().min(2).max(64))
+  name: string
 }
 
 export class QueryTemplateInstanceDTO {
@@ -36,5 +41,6 @@ export class QueryTemplateInstanceDTO {
   courseName: string
   courseId: string
   type: number
+  name: string
   updateAt: Date
 }
