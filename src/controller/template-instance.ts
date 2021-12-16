@@ -84,6 +84,23 @@ export class TemplateInstanceController {
     return R.Ok().Data(data)
   }
 
+  @Get('/excel')
+  async listExcelInstances(
+    @Query('course_id') courseId,
+    @Query('template_id') templateId
+  ): Promise<R> {
+    const data = await this.templateInstanceService.listEXCELInstance(
+      (this.ctx.teacher as Teacher).staffId,
+      {
+        courseId,
+        templateId,
+      }
+    )
+
+    if (!data) return R.Fail().Msg('get list fail')
+    return R.Ok().Data(data)
+  }
+
   @Post('/copy/:id')
   async copyInstance(@Param('id') iid: string): Promise<R> {
     const [ok, res] = await this.templateInstanceService.copyInstance(iid)

@@ -194,8 +194,9 @@ export class TemplateInstanceService {
     const template = await this.templateModel.findOne(templateId)
     if (!templateId) return [false, new Error('template not found')]
 
+    console.log(instance.tags)
     const doc = await loadDocxFile(readFileSync(template.path, 'binary'))
-    doc.render(instance.tags)
+    doc.render(JSON.parse(instance.tags))
 
     const content = doc.getZip().generate({
       type: 'nodebuffer',
