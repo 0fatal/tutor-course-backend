@@ -9,11 +9,12 @@ import {
   UpdateTemplateInstanceDTO,
 } from '../dto/templateInstance/template-instance'
 import { loadDocxFile } from '../utils/doc'
-import { readFileSync, writeFileSync } from 'fs'
-import { resolve } from 'path'
+import { readFileSync, unlinkSync, writeFileSync } from 'fs'
+import path, { resolve } from 'path'
 import { FileStream } from '../../typings/app'
 import xlsx from 'xlsx'
 import { Course } from '../entity/course'
+import { generaFileId, writeFileToDisk } from '../utils/common'
 
 export enum TemplateType {
   DOCX,
@@ -271,6 +272,7 @@ export class TemplateInstanceService {
     staffId: string,
     file: FileStream
   ): Promise<[boolean, any]> {
+    console.log(fid)
     const template = await this.templateModel.findOne({
       where: {
         fid,
@@ -281,14 +283,21 @@ export class TemplateInstanceService {
     if (!template) return [false, null]
 
     // const doc = loadDocxFile(readFileSync(template.path, 'binary'))
-    const workbook = xlsx.read(file)
+    const tmpFilename = `xlsx${generaFileId()}`
+    await writeFileToDisk(tmpFilename, file)
+
+    const fileDir = path.join('template', tmpFilename)
+    const workbook = xlsx.readFile(fileDir)
+    unlinkSync(fileDir)
     const data = xlsx.utils.sheet_to_json(
       workbook.Sheets[workbook.SheetNames[0]]
     )
 
+    console.log(data)
+
     return await this.newInstance({
       type: TemplateType.EXCEL,
-      tags: data,
+      tags: { clints: data },
       templateId: fid,
       staffId,
     })

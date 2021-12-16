@@ -35,7 +35,7 @@ export default (appInfo: EggAppInfo) => {
   config.multipart = {
     mode: 'stream',
     fileSize: 1048576000,
-    whitelist: ['.docx'],
+    whitelist: ['.docx', '.xlsx'],
   }
 
   config.cors = {

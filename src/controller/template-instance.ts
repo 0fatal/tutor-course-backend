@@ -13,10 +13,7 @@ import {
   Validate,
 } from '@midwayjs/decorator'
 import { R } from '../utils/response'
-import {
-  TemplateInstanceService,
-  TemplateType,
-} from '../service/template-instance'
+import { TemplateInstanceService } from '../service/template-instance'
 import {
   NewTemplateInstanceDTO,
   UpdateTemplateInstanceDTO,
@@ -35,14 +32,17 @@ export class TemplateInstanceController {
   ctx: Context
 
   @Post('/new')
-  async newInstance(@Body(ALL) data: NewTemplateInstanceDTO): Promise<R> {
+  async newInstance(
+    @Body(ALL) data: NewTemplateInstanceDTO,
+    @Query('template_id') templateId: string
+  ): Promise<R> {
     data.staffId = (this.ctx.teacher as Teacher).staffId
     if (!data.staffId) return R.Fail().Msg('please relogin again')
-    if (data.type === TemplateType.EXCEL) {
+    if (templateId) {
       const file = await this.ctx.getFileStream()
       const [ok, err] =
         await this.templateInstanceService.uploadExcelAndSaveToInstance(
-          data.templateId,
+          templateId,
           data.staffId,
           file
         )
