@@ -6,6 +6,13 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+// CourseState 开课状态
+// 0：未开课，1：开课
+export enum CourseState {
+  DISABLE = 0,
+  ABLE = 1,
+}
+
 @EntityModel('course')
 export class Course {
   @PrimaryGeneratedColumn('uuid')
@@ -28,4 +35,17 @@ export class Course {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updateAt: Date
+
+  @Column()
+  beginYear: number
+
+  @Column()
+  endYear: number
+
+  // 学分
+  @Column()
+  credit: number
+
+  @Column()
+  courseState: CourseState
 }
