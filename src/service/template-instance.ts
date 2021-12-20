@@ -16,6 +16,7 @@ import { FileStream } from '../../typings/app'
 import xlsx from 'xlsx'
 import { Course } from '../entity/course'
 import { generaFileId, writeFileToDisk } from '../utils/common'
+import { mergeDocumentDocx } from '../utils/cloudmersive'
 
 export enum TemplateType {
   DOCX,
@@ -126,7 +127,7 @@ export class TemplateInstanceService {
           courseId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt', 'excelId'],
       })
     } else if (templateId) {
       instances = await this.templateInstanceModel.find({
@@ -135,7 +136,7 @@ export class TemplateInstanceService {
           templateId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt', 'excelId'],
       })
     } else {
       instances = await this.templateInstanceModel.find({
@@ -143,7 +144,7 @@ export class TemplateInstanceService {
           staffId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt', 'excelId'],
       })
     }
 
@@ -157,6 +158,7 @@ export class TemplateInstanceService {
           instance.courseId
         )
 
+        console.log(instance.excelId)
         let excel = null
 
         if (instance.excelId) {
@@ -226,8 +228,30 @@ export class TemplateInstanceService {
       type: 'nodebuffer',
     })
 
-    const tmpPath = resolve('temp', template.templateName)
+    const tmpPath = resolve('temp', generaFileId() + template.templateName)
     writeFileSync(tmpPath, content)
+
+    if (instance.excelId) {
+      const excel = await this.templateInstanceModel.findOne(instance.excelId)
+      const { templateId: excelTemplateId } = excel
+      const excelTemplate = await this.templateModel.findOne(excelTemplateId)
+      const excelDoc = await loadDocxFile(
+        readFileSync(excelTemplate.filepath, 'binary')
+      )
+      excelDoc.render(JSON.parse(excel.tags))
+      const excelContent = excelDoc.getZip().generate({
+        type: 'nodebuffer',
+      })
+
+      console.log(excel.tags)
+
+      const excelTmpPath = resolve('temp', generaFileId())
+      writeFileSync(excelTmpPath, excelContent)
+
+      const data = await mergeDocumentDocx(tmpPath, excelTmpPath)
+      writeFileSync(tmpPath, data)
+      unlinkSync(excelTmpPath)
+    }
 
     return [true, tmpPath]
   }
