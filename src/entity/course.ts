@@ -48,4 +48,8 @@ export class Course {
 
   @Column()
   courseState: CourseState
+
+  // 学期
+  @Column()
+  semester: number
 }
