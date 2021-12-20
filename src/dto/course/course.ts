@@ -10,6 +10,15 @@ export class UpdateCourseDTO {
 
   @Rule(RuleType.string().optional())
   courseName: string
+
+  @Rule(RuleType.number().optional())
+  beginYear: number
+
+  @Rule(RuleType.number().optional())
+  endYear: number
+
+  @Rule(RuleType.number().optional())
+  credit: number
 }
 
 export class NewCourseDTO {
@@ -18,4 +27,13 @@ export class NewCourseDTO {
 
   @Rule(RuleType.string().max(32).required())
   courseName: string
+
+  @Rule(RuleType.number().required())
+  beginYear: number
+
+  @Rule(RuleType.number().required())
+  endYear: number
+
+  @Rule(RuleType.number().required())
+  credit: number
 }
