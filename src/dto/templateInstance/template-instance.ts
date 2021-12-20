@@ -1,10 +1,7 @@
-import { TemplateType } from '../../service/template-instance'
 import { Rule } from '@midwayjs/decorator'
 import { RuleType } from '@midwayjs/decorator/dist/annotation/rule'
 
 export class NewTemplateInstanceDTO {
-  type: TemplateType
-
   @Rule(RuleType.string().length(36))
   templateId: string
 
@@ -16,8 +13,9 @@ export class NewTemplateInstanceDTO {
 
   @Rule(RuleType.string().min(2).max(64))
   name: string
-  // @Rule(RuleType.string().length(36))
-  // courseId: string
+
+  @Rule(RuleType.string().length(36))
+  courseId: string
 }
 
 export class UpdateTemplateInstanceDTO {
@@ -47,7 +45,7 @@ export class QueryTemplateInstanceDTO {
   excel: {
     id: string
     name: string
-  }
+  } | null
   name: string
   updateAt: Date
 }

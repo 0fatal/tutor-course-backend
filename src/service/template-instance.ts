@@ -36,9 +36,8 @@ export class TemplateInstanceService {
     templateId,
     tags,
     staffId,
-    // courseId,
+    courseId,
     name,
-    type,
   }: NewTemplateInstanceDTO): Promise<[boolean, any]> {
     try {
       const template = await this.templateModel.findOne(templateId)
@@ -46,18 +45,18 @@ export class TemplateInstanceService {
         return [false, new Error('template not found')]
       }
 
-      // const course = await this.templateModel.findOne(courseId)
-      // if (!course) {
-      //   return [false, new Error('course not found')]
-      // }
+      const course = await this.templateModel.findOne(courseId)
+      if (!course) {
+        return [false, new Error('course not found')]
+      }
 
       let instance = new TemplateInstance()
       instance = {
         ...instance,
-        type,
         templateId,
         staffId,
         name,
+        courseId,
         tags: JSON.stringify(tags),
       }
 
@@ -84,25 +83,13 @@ export class TemplateInstanceService {
     id: instanceId,
     tags,
     name,
-    courseId,
+    excelId,
   }: UpdateTemplateInstanceDTO): Promise<[boolean, any]> {
     try {
-      if (courseId) {
-        const course = await this.templateModel.findOne(courseId)
-        if (!course) {
-          return [false, new Error('course not found')]
-        }
-
-        await this.templateInstanceModel.update(instanceId, {
-          tags: JSON.stringify(tags),
-          name,
-          courseId,
-        })
-      }
-
       await this.templateInstanceModel.update(instanceId, {
         tags: JSON.stringify(tags),
         name,
+        excelId,
       })
     } catch (e: any) {
       return [false, e]
@@ -120,6 +107,7 @@ export class TemplateInstanceService {
     { templateId, courseId }: { templateId?: string; courseId?: string } = {}
   ): Promise<QueryTemplateInstanceDTO[]> {
     let instances
+
     if (templateId && courseId) {
       instances = await this.templateInstanceModel.find({
         where: {
@@ -128,7 +116,7 @@ export class TemplateInstanceService {
           courseId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
       })
     } else if (courseId) {
       instances = await this.templateInstanceModel.find({
@@ -137,7 +125,7 @@ export class TemplateInstanceService {
           courseId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
       })
     } else if (templateId) {
       instances = await this.templateInstanceModel.find({
@@ -146,7 +134,7 @@ export class TemplateInstanceService {
           templateId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
       })
     } else {
       instances = await this.templateInstanceModel.find({
@@ -154,32 +142,66 @@ export class TemplateInstanceService {
           staffId,
           type: TemplateType.DOCX,
         },
-        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
       })
     }
 
     if (instances && instances.length > 0) {
       for (let i = 0; i < instances.length; i++) {
         const instance = instances[i]
-        const { filename } = await this.templateModel.findOne(
+        const { templateName } = await this.templateModel.findOne(
           instance.templateId
         )
-        const { courseName } = await this.courseModel.findOne(instance.courseId)
-        instances[i] = {
-          ...instance,
-          templateName: filename,
-          courseName,
+        const { courseName, courseId } = await this.courseModel.findOne(
+          instance.courseId
+        )
+
+        let excel = null
+
+        if (instance.excelId) {
+          const { id, name } = await this.templateInstanceModel.findOne(
+            instance.excelId
+          )
+          excel = {
+            id,
+            name,
+          }
         }
+
+        instances[i] = {
+          id: instance.id,
+          name: instance.name,
+          updateAt: instance.updateAt,
+          template: {
+            templateId: instance.templateId,
+            templateName: templateName,
+          },
+          excel: excel,
+          course: {
+            courseName,
+            courseId,
+          },
+        } as QueryTemplateInstanceDTO
       }
     }
     return instances
   }
 
-  async copyInstance(instanceId: string): Promise<[boolean, any]> {
+  async copyInstance({
+    instanceId,
+    courseId,
+    name,
+  }: {
+    instanceId: string
+    courseId: string
+    name: string
+  }): Promise<[boolean, any]> {
     const instance = await this.templateInstanceModel.findOne(instanceId)
     if (!instance) return [false, new Error('instance not found')]
     const newInstance = this.templateInstanceModel.create({
       ...instance,
+      courseId: courseId,
+      name,
     })
 
     delete newInstance['id']
@@ -200,14 +222,14 @@ export class TemplateInstanceService {
     if (!templateId) return [false, new Error('template not found')]
 
     console.log(instance.tags)
-    const doc = await loadDocxFile(readFileSync(template.path, 'binary'))
+    const doc = await loadDocxFile(readFileSync(template.filepath, 'binary'))
     doc.render(JSON.parse(instance.tags))
 
     const content = doc.getZip().generate({
       type: 'nodebuffer',
     })
 
-    const tmpPath = resolve('temp', template.filename)
+    const tmpPath = resolve('temp', template.templateName)
     writeFileSync(tmpPath, content)
 
     return [true, tmpPath]
@@ -218,6 +240,7 @@ export class TemplateInstanceService {
     { templateId, courseId }: { templateId?: string; courseId?: string } = {}
   ): Promise<QueryTemplateInstanceDTO[]> {
     let instances
+
     if (templateId && courseId) {
       instances = await this.templateInstanceModel.find({
         where: {
@@ -226,7 +249,7 @@ export class TemplateInstanceService {
           courseId,
           type: TemplateType.EXCEL,
         },
-        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
       })
     } else if (courseId) {
       instances = await this.templateInstanceModel.find({
@@ -235,7 +258,7 @@ export class TemplateInstanceService {
           courseId,
           type: TemplateType.EXCEL,
         },
-        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
       })
     } else if (templateId) {
       instances = await this.templateInstanceModel.find({
@@ -244,7 +267,7 @@ export class TemplateInstanceService {
           templateId,
           type: TemplateType.EXCEL,
         },
-        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
       })
     } else {
       instances = await this.templateInstanceModel.find({
@@ -252,45 +275,50 @@ export class TemplateInstanceService {
           staffId,
           type: TemplateType.EXCEL,
         },
-        select: ['id', 'name', 'templateId', 'type', 'courseId', 'updateAt'],
+        select: ['id', 'name', 'templateId', 'courseId', 'updateAt'],
       })
     }
 
     if (instances && instances.length > 0) {
       for (let i = 0; i < instances.length; i++) {
         const instance = instances[i]
-        const { filename } = await this.templateModel.findOne(
+        const { templateName } = await this.templateModel.findOne(
           instance.templateId
         )
-        const { courseName } = await this.courseModel.findOne(instance.courseId)
+        const { courseName, courseId } = await this.courseModel.findOne(
+          instance.courseId
+        )
+
         instances[i] = {
-          ...instance,
-          templateName: filename,
-          courseName,
-        }
+          id: instance.id,
+          name: instance.name,
+          updateAt: instance.updateAt,
+          template: {
+            templateId: instance.templateId,
+            templateName: templateName,
+          },
+          course: {
+            courseName,
+            courseId,
+          },
+        } as QueryTemplateInstanceDTO
       }
     }
     return instances
   }
 
   async uploadExcelAndSaveToInstance(
-    fid: string,
+    tid: string,
     staffId: string,
+    courseId: string,
     file: FileStream
   ): Promise<[boolean, any]> {
-    console.log(fid)
-    const template = await this.templateModel.findOne({
-      where: {
-        fid,
-        type: TemplateType.EXCEL,
-      },
-    })
+    const template = await this.templateModel.findOne(tid)
 
     if (!template) return [false, null]
 
-    // const doc = loadDocxFile(readFileSync(template.path, 'binary'))
     const tmpFilename = `xlsx${generaFileId()}`
-    await writeFileToDisk(tmpFilename, file)
+    await writeFileToDisk(tmpFilename, file, 'temp')
 
     const fileDir = path.join('template', tmpFilename)
     const workbook = xlsx.readFile(fileDir)
@@ -302,22 +330,11 @@ export class TemplateInstanceService {
     console.log(data)
 
     return await this.newInstance({
-      type: TemplateType.EXCEL,
       tags: { clints: data },
-      templateId: fid,
+      templateId: tid,
       name: file.filename,
       staffId,
+      courseId,
     })
-
-    // doc.render(data)
-    // const content = doc.getZip().generate({
-    //   type: 'nodebuffer',
-    // })
-    //
-    // const tmpPath = resolve('temp', template.filename)
-    //
-    // writeFileSync(tmpPath, content)
-
-    // return [true, tmpPath]
   }
 }
