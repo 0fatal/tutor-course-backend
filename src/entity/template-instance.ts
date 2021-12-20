@@ -11,9 +11,6 @@ export class TemplateInstance {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Column({ type: 'tinyint' })
-  type: number // 0: docx 1:excel
-
   @Column()
   templateId: string
 
@@ -31,6 +28,9 @@ export class TemplateInstance {
 
   @Column({ type: 'varchar', length: 36 })
   courseId: string
+
+  @Column({ type: 'varchar', length: 36 })
+  excelId: string
 
   @Column({ type: 'varchar', length: 64 })
   name: string

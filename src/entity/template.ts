@@ -4,16 +4,16 @@ import { Column, PrimaryColumn } from 'typeorm'
 @EntityModel('template')
 export class Template {
   @PrimaryColumn()
-  fid: string
+  tid: string
 
   @Column()
-  filename: string
+  templateName: string
+
   @Column()
-  path: string
+  filepath: string
+
   @Column()
   createAt: Date
-  @Column()
-  courseId: string
 
   @Column()
   type: number
