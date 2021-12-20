@@ -34,4 +34,7 @@ export class TemplateInstance {
 
   @Column({ type: 'varchar', length: 64 })
   name: string
+
+  @Column({ type: 'tinyint' })
+  type: number
 }
