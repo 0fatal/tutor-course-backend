@@ -4,6 +4,7 @@ import { Template } from '../entity/template'
 import { Repository } from 'typeorm'
 import { TemplateInstance } from '../entity/template-instance'
 import {
+  CopyTemplateInstance,
   NewTemplateInstanceDTO,
   QueryTemplateInstanceDTO,
   UpdateTemplateInstanceDTO,
@@ -191,11 +192,7 @@ export class TemplateInstanceService {
     instanceId,
     courseId,
     name,
-  }: {
-    instanceId: string
-    courseId: string
-    name: string
-  }): Promise<[boolean, any]> {
+  }: CopyTemplateInstance): Promise<[boolean, any]> {
     const instance = await this.templateInstanceModel.findOne(instanceId)
     if (!instance) return [false, new Error('instance not found')]
     const newInstance = this.templateInstanceModel.create({

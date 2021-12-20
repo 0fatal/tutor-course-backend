@@ -49,3 +49,14 @@ export class QueryTemplateInstanceDTO {
   name: string
   updateAt: Date
 }
+
+export class CopyTemplateInstance {
+  @Rule(RuleType.string().min(2).max(64))
+  name: string
+
+  @Rule(RuleType.string().length(36))
+  courseId: string
+
+  @Rule(RuleType.string().length(36))
+  instanceId: string
+}

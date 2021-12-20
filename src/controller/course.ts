@@ -8,11 +8,12 @@ import {
   Patch,
   Post,
   Provide,
+  Validate,
 } from '@midwayjs/decorator'
 import { Context } from '@midwayjs/web'
 import { CourseService } from '../service/course'
 import { R } from '../utils/response'
-import { NewCourseDTO } from '../dto/course/course'
+import { NewCourseDTO, UpdateCourseState } from '../dto/course/course'
 
 @Provide()
 @Controller('/course')
@@ -45,5 +46,12 @@ export class CourseController {
   async newCourse(@Body(ALL) course: NewCourseDTO): Promise<R> {
     await this.courseService.newCourse(course)
     return R.Ok()
+  }
+
+  @Validate()
+  @Patch('/state')
+  async updateCourseState(@Body(ALL) data: UpdateCourseState): Promise<R> {
+    const ok = this.courseService.updateCourseState(data)
+    return ok ? R.Ok() : R.Fail()
   }
 }

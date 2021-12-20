@@ -4,7 +4,11 @@ import { Course } from '../entity/course'
 import { InjectEntityModel } from '@midwayjs/orm'
 import { ErrorType } from '../errorType/base'
 import { CourseErrorMap } from '../errorType/course'
-import { NewCourseDTO, UpdateCourseDTO } from '../dto/course/course'
+import {
+  NewCourseDTO,
+  UpdateCourseDTO,
+  UpdateCourseState,
+} from '../dto/course/course'
 
 @Provide()
 export class CourseService {
@@ -23,6 +27,7 @@ export class CourseService {
         'courseName',
         'beginYear',
         'endYear',
+        'semester',
         'credit',
         'courseState',
       ],
@@ -46,5 +51,20 @@ export class CourseService {
       throw ErrorType.wrap(CourseErrorMap['CREATE_COURSE_ERROR'], e.message)
     }
     return true
+  }
+
+  async updateCourseState({
+    courseId,
+    courseState,
+  }: UpdateCourseState): Promise<boolean> {
+    const course = await this.courseRepository.findOne(courseId)
+    console.log(courseState)
+    if (course) {
+      return (
+        (await this.courseRepository.update(courseId, { courseState }))
+          .affected === 1
+      )
+    }
+    return false
   }
 }

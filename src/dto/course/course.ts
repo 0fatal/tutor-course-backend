@@ -1,5 +1,6 @@
 import { RuleType } from '@midwayjs/decorator/dist/annotation/rule'
 import { Rule } from '@midwayjs/decorator'
+import { CourseState } from '../../entity/course'
 
 export class UpdateCourseDTO {
   @Rule(RuleType.string().required().length(36))
@@ -36,4 +37,12 @@ export class NewCourseDTO {
 
   @Rule(RuleType.number().required())
   credit: number
+}
+
+export class UpdateCourseState {
+  @Rule(RuleType.string().required().length(36))
+  courseId: string
+
+  @Rule(RuleType.number().integer().min(0).max(1))
+  courseState: CourseState
 }
