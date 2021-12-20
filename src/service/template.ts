@@ -18,7 +18,8 @@ export class TemplateService {
   templateModel: Repository<Template>
 
   async uploadTemplate(
-    file: FileStream
+    file: FileStream,
+    templateType: TemplateType
   ): Promise<[ifSuccess: boolean, res: any]> {
     const tid: string = generaFileId()
     const fileName = `${tid}.docx`
@@ -35,7 +36,7 @@ export class TemplateService {
         tid,
         templateName: file.filename,
         filepath: fileDir,
-        type: TemplateType.DOCX,
+        type: templateType,
       }
 
       try {
@@ -80,15 +81,15 @@ export class TemplateService {
   }
 
   async getTags({
-    fid,
+    tid,
     staffId,
     courseId,
   }: {
-    fid: string
+    tid: string
     staffId: string
     courseId: string
   }): Promise<any> {
-    const template = await this.templateModel.findOne(fid)
+    const template = await this.templateModel.findOne(tid)
     return await this.processTags(template.filepath, staffId, courseId)
   }
 
