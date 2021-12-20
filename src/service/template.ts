@@ -1,7 +1,6 @@
 import { Provide } from '@midwayjs/decorator'
 import { InjectEntityModel } from '@midwayjs/orm'
-import { readFileSync, unlink, writeFileSync } from 'fs'
-import { resolve } from 'path'
+import { readFileSync, unlink } from 'fs'
 import { Repository } from 'typeorm'
 import { promisify } from 'util'
 import { FileStream } from '../../typings/app'
@@ -19,11 +18,10 @@ export class TemplateService {
   templateModel: Repository<Template>
 
   async uploadTemplate(
-    file: FileStream,
-    templateType: number
+    file: FileStream
   ): Promise<[ifSuccess: boolean, res: any]> {
-    const fid = generaFileId()
-    const fileName = `${fid}.docx`
+    const tid: string = generaFileId()
+    const fileName = `${tid}.docx`
 
     const {
       type: writeResType,
@@ -34,11 +32,10 @@ export class TemplateService {
       let template = new Template()
       template = {
         ...template,
-        fid,
-        filename: file.filename,
-        path: fileDir,
-        createAt: new Date(),
-        type: templateType,
+        tid,
+        templateName: file.filename,
+        filepath: fileDir,
+        type: TemplateType.DOCX,
       }
 
       try {
@@ -46,7 +43,7 @@ export class TemplateService {
         return [
           true,
           {
-            fid,
+            tid,
           },
         ]
       } catch (e) {
@@ -57,104 +54,42 @@ export class TemplateService {
     }
   }
 
-  async renderAndBuild(fid: string, tags: any): Promise<[string, any]> {
-    const template = await this.templateModel.findOne(fid)
-    // var out = doc.getZip().generate({
-    //   type: 'blob',
-    //   mimeType:
-    //     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    // }) // Output the document using Data-URI
-    const doc = await loadDocxFile(readFileSync(template.path, 'binary'))
-    doc.render(tags)
-    const content = doc.getZip().generate({
-      type: 'nodebuffer',
+  async getTemplateList(): Promise<Template[]> {
+    return await this.templateModel.find({
+      order: {
+        createAt: 'DESC',
+      },
+      where: { type: TemplateType.DOCX },
+      select: ['templateName', 'tid', 'createAt'],
     })
-
-    const tmpPath = resolve('temp', template.filename)
-    writeFileSync(tmpPath, content)
-    return [template.filename, tmpPath]
-    // const { type:writeResType, error,fileDir } = await writeFileToDisk(fileName,file)
-
-    // if (writeResType) {
-    //   let template = new Template()
-    //   template = {
-    //     ...template,
-    //     fid,
-    //     filename: fileName,
-    //     path: fileDir,
-    //     createAt: new Date()
-    //   }
-
-    //   try {
-    //     const tags = await getDocxTags(loadDocxFile(readFileSync(fileDir,'binary')))
-    //     await this.templateModel.save(template)
-    //     return [true,{
-    //       fid,
-    //       tags
-    //     }]
-    //   } catch(e) {
-    //     return  [false,e]
-    //   }
-    // }
-    // else {
-    //   return  [false,error]
-    // }
   }
 
-  async getTemplateList(courseId?: string): Promise<TemplateList> {
-    console.log(courseId)
-    return (
-      await this.templateModel.find({
-        order: {
-          createAt: 'DESC',
-        },
-        where: Object.assign(
-          { type: TemplateType.DOCX },
-          courseId
-            ? {
-                courseId,
-              }
-            : {}
-        ),
-      })
-    ).map(({ fid, filename, createAt }) => ({
-      fid,
-      filename,
-      createAt,
-    })) as TemplateList
-  }
-
-  async getEXCELTemplateList(courseId?: string): Promise<TemplateList> {
-    console.log(courseId)
-    return (
-      await this.templateModel.find({
-        order: {
-          createAt: 'DESC',
-        },
-        where: Object.assign(
-          { type: TemplateType.EXCEL },
-          courseId
-            ? {
-                courseId,
-              }
-            : {}
-        ),
-      })
-    ).map(({ fid, filename, createAt }) => ({
-      fid,
-      filename,
-      createAt,
-    })) as TemplateList
+  async getEXCELTemplateList(): Promise<Template[]> {
+    return await this.templateModel.find({
+      order: {
+        createAt: 'DESC',
+      },
+      where: { type: TemplateType.EXCEL },
+      select: ['templateName', 'tid', 'createAt'],
+    })
   }
 
   async getTemplate(fid: string): Promise<[string, any]> {
     const template = await this.templateModel.findOne(fid)
-    return [template.filename, template.path]
+    return [template.templateName, template.filepath]
   }
 
-  async getTags(fid: string, tid: string): Promise<any> {
+  async getTags({
+    fid,
+    staffId,
+    courseId,
+  }: {
+    fid: string
+    staffId: string
+    courseId: string
+  }): Promise<any> {
     const template = await this.templateModel.findOne(fid)
-    return await this.processTags(template.path, tid, template.courseId)
+    return await this.processTags(template.filepath, staffId, courseId)
   }
 
   async processTags(
@@ -194,29 +129,29 @@ export class TemplateService {
 
   async _innerBaseTagsReplace(tags: any): Promise<any> {
     const replaceMap = {
-      beginSchoolYear() {
-        const date = new Date()
-        if (date.getMonth() >= 9) {
-          return date.getFullYear()
-        }
-        return date.getFullYear() - 1
-      },
-
-      endSchoolYear() {
-        const date = new Date()
-        if (date.getMonth() >= 9) {
-          return date.getFullYear() + 1
-        }
-        return date.getFullYear()
-      },
-
-      semester() {
-        const date = new Date()
-        if (date.getMonth() >= 9) {
-          return 1
-        }
-        return 0
-      },
+      // beginSchoolYear() {
+      //   const date = new Date()
+      //   if (date.getMonth() >= 9) {
+      //     return date.getFullYear()
+      //   }
+      //   return date.getFullYear() - 1
+      // },
+      //
+      // endSchoolYear() {
+      //   const date = new Date()
+      //   if (date.getMonth() >= 9) {
+      //     return date.getFullYear() + 1
+      //   }
+      //   return date.getFullYear()
+      // },
+      //
+      // semester() {
+      //   const date = new Date()
+      //   if (date.getMonth() >= 9) {
+      //     return 1
+      //   }
+      //   return 0
+      // },
 
       editTime() {
         return dayjs().format('YYYY-MM-DD')
@@ -247,6 +182,18 @@ export class TemplateService {
     const course = await this.courseRepository.findOne(cid)
 
     const replaceMap = {
+      beginSchoolYear() {
+        return course.beginYear
+      },
+
+      endSchoolYear() {
+        return course.endYear
+      },
+
+      semester() {
+        return course.semester
+      },
+
       teacherName() {
         return teacher.name
       },
@@ -256,21 +203,8 @@ export class TemplateService {
       },
 
       courseCode() {
-        let beginSchoolYear: number
-        let endSchoolYear: number
-        let semester: number
-        const date = new Date()
-        if (date.getMonth() >= 9) {
-          beginSchoolYear = date.getFullYear()
-          semester = 1
-        } else {
-          beginSchoolYear = date.getFullYear() - 1
-          semester = 2
-        }
-
-        endSchoolYear = beginSchoolYear + 1
-
-        return `(${beginSchoolYear}-${endSchoolYear}-${semester})-${course.courseNum}-`
+        const { beginYear, endYear, semester } = course
+        return `(${beginYear}-${endYear}-${semester})-${course.courseNum}-`
       },
     }
     const keys = Object.keys(tags)
@@ -282,27 +216,19 @@ export class TemplateService {
     return tags
   }
 
-  async deleteTemplate(fid: string): Promise<boolean> {
-    const template = await this.templateModel.findOne(fid)
+  async deleteTemplate(tid: string): Promise<boolean> {
+    const template = await this.templateModel.findOne(tid)
     if (template) {
-      const ifSuccess = (await this.templateModel.delete(fid)).affected > 0
+      const ifSuccess = (await this.templateModel.delete(tid)).affected > 0
       if (ifSuccess) {
         try {
-          await promisify(unlink)(template.path)
+          await promisify(unlink)(template.filepath)
         } catch (e) {
-          console.log(`rm ${template.filename} error: ${e.message}`)
+          console.log(`rm ${template.templateName} error: ${e.message}`)
         }
       }
       return ifSuccess
     }
     return false
   }
-
-  async downloadTemplate(iid: string) {}
 }
-
-export type TemplateList = {
-  fid: string
-  filename: string
-  createAt: Date
-}[]
