@@ -1,4 +1,5 @@
 import { createWriteStream } from 'fs'
+// eslint-disable-next-line node/no-extraneous-import
 import { v4 as uuidv4 } from 'uuid'
 import { FileStream } from '../../typings/app'
 import * as awaitStream from 'await-stream-ready'
@@ -9,11 +10,13 @@ export const generaFileId = (): string => {
   return uuidv4()
 }
 
-const FILE_DIR = 'template'
 export const writeFileToDisk = async (
   filename: string,
-  file: FileStream
+  file: FileStream,
+  dir = 'template'
 ): Promise<{ type: boolean; fileDir?: string; error?: any }> => {
+  const FILE_DIR = dir
+
   const fileDir = path.join(FILE_DIR, filename)
   const writeStream = createWriteStream(fileDir)
   try {
