@@ -10,6 +10,7 @@
     "@midwayjs/orm": "^2.13.4",
     "@midwayjs/web": "^2.3.0",
     "await-stream-ready": "^1.0.1",
+    "cloudmersive-convert-api-client": "^2.7.4",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.10.7",
     "docxtemplater": "^3.26.3",
