@@ -28,7 +28,7 @@ export class UpdateTemplateInstanceDTO {
   tags: any
 
   @Rule(RuleType.string().optional().length(36))
-  courseId: string
+  excelId: string
 
   @Rule(RuleType.string().optional().min(2).max(64))
   name: string
@@ -36,11 +36,18 @@ export class UpdateTemplateInstanceDTO {
 
 export class QueryTemplateInstanceDTO {
   id: string
-  templateId: string
-  templateName: string
-  courseName: string
-  courseId: string
-  type: number
+  template: {
+    templateId: string
+    templateName: string
+  }
+  course: {
+    courseName: string
+    courseId: string
+  }
+  excel: {
+    id: string
+    name: string
+  }
   name: string
   updateAt: Date
 }
