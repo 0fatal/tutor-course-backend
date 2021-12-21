@@ -2,6 +2,7 @@ import { EntityModel } from '@midwayjs/orm'
 import {
   Column,
   CreateDateColumn,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -55,6 +56,9 @@ export class Course {
   @Column()
   semester: number
 
-  @ManyToOne(() => Course, course => course.courseNature)
+  @ManyToOne(() => CourseNature, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'courseNatureId' })
   courseNature: CourseNature
 }
