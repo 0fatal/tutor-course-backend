@@ -24,3 +24,21 @@ export class LoginDTO {
   @Rule(RuleType.string().min(5).max(8).required())
   staffId: string
 }
+
+export class UpdatePasswordDTO {
+  @Rule(RuleType.forbidden())
+  staffId: string
+
+  @Rule(RuleType.string().min(6).max(20).required())
+  password: string
+
+  @Rule(RuleType.string().min(6).max(20).required())
+  oldPassword: string
+
+  @Rule(
+    RuleType.equal(RuleType.ref('password'))
+      .required()
+      .messages({ 'any.only': "password aren't the same" })
+  )
+  checkPass: string
+}

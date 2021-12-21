@@ -2,7 +2,11 @@ import { InjectEntityModel } from '@midwayjs/orm'
 import { Teacher } from '../entity/teacher'
 import { Repository } from 'typeorm'
 import MD5 from 'crypto-js/md5'
-import { RegistryTeacherDTO, UpdateTeacherDTO } from '../dto/teacher/teacher'
+import {
+  RegistryTeacherDTO,
+  UpdatePasswordDTO,
+  UpdateTeacherDTO,
+} from '../dto/teacher/teacher'
 import { Provide } from '@midwayjs/decorator'
 import { TeacherInfoDTO } from '../dto/teacher/teacher.response'
 
@@ -59,6 +63,23 @@ export class TeacherService {
     } catch (e: any) {
       console.log(e)
       return false
+    }
+  }
+
+  async changePassword(
+    data: UpdatePasswordDTO
+  ): Promise<[ok: boolean, res: any]> {
+    try {
+      const { password } = await this._teacherModel.findOne(data.staffId)
+      if (password !== MD5(data.oldPassword).toString())
+        throw new Error('old password wrong')
+      const res = await this._teacherModel.update(data.staffId, {
+        password: MD5(data.password).toString(),
+      })
+      return [res.affected === 1, null]
+    } catch (e: any) {
+      console.log(e)
+      return [false, e]
     }
   }
 }
