@@ -2,9 +2,11 @@ import { EntityModel } from '@midwayjs/orm'
 import {
   Column,
   CreateDateColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
+import { CourseNature } from './course-nature'
 
 // CourseState 开课状态
 // 0：未开课，1：开课
@@ -52,4 +54,7 @@ export class Course {
   // 学期
   @Column()
   semester: number
+
+  @ManyToOne(() => Course, course => course.courseNature)
+  courseNature: CourseNature
 }
