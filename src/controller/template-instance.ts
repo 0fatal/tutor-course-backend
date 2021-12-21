@@ -35,8 +35,7 @@ export class TemplateInstanceController {
   @Post('/new')
   async newInstance(
     @Body(ALL) data: NewTemplateInstanceDTO,
-    @Query('template_id') templateId: string,
-    @Query('course_id') courseId: string
+    @Query('template_id') templateId: string
   ): Promise<R> {
     data.staffId = (this.ctx.teacher as Teacher).staffId
     if (!data.staffId) return R.Fail().Msg('please relogin again')
@@ -46,7 +45,6 @@ export class TemplateInstanceController {
         await this.templateInstanceService.uploadExcelAndSaveToInstance(
           templateId,
           data.staffId,
-          courseId,
           file
         )
       if (!ok)

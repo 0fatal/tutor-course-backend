@@ -37,4 +37,7 @@ export class TemplateInstance {
 
   @Column({ type: 'tinyint' })
   type: number
+
+  @Column({ type: 'varchar', length: 36, nullable: true })
+  excelS: string
 }
