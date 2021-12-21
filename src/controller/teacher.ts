@@ -15,6 +15,7 @@ import { Context } from 'egg'
 import {
   LoginDTO,
   RegistryTeacherDTO,
+  UpdatePasswordDTO,
   UpdateTeacherDTO,
 } from '../dto/teacher/teacher'
 import { TeacherErrorMap } from '../errorType/teacher'
@@ -66,6 +67,15 @@ export class TeacherController {
   async registry(@Body(ALL) data: RegistryTeacherDTO): Promise<R> {
     const [ok, err] = await this._teacherService.registry(data)
     if (!ok) return R.Fail().Msg(err ?? 'registry fail')
+    return R.Ok()
+  }
+
+  @Post('/password/change')
+  @Validate()
+  async changePassword(@Body(ALL) data: UpdatePasswordDTO): Promise<R> {
+    data.staffId = this.ctx['teacher'].staffId
+    const [ok, err] = await this._teacherService.changePassword(data)
+    if (!ok) return R.Fail().Msg(err.message ?? 'change password fail')
     return R.Ok()
   }
 }
