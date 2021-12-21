@@ -75,8 +75,8 @@ export class TemplateController {
 
   @Get('/tags')
   async getTags(
-    @Query('tid') tid: string,
-    @Query('cid') cid: string
+    @Query('templateId') tid: string,
+    @Query('courseId') cid: string
   ): Promise<R> {
     return R.Ok().Data(
       await this._templateService.getTags({

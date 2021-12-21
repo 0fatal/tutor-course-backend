@@ -1,4 +1,4 @@
-import { Provide } from '@midwayjs/decorator'
+import { Inject, Provide } from '@midwayjs/decorator'
 import { InjectEntityModel } from '@midwayjs/orm'
 import { Template } from '../entity/template'
 import { Repository } from 'typeorm'
@@ -17,6 +17,7 @@ import xlsx from 'xlsx'
 import { Course } from '../entity/course'
 import { generaFileId, writeFileToDisk } from '../utils/common'
 import { mergeDocumentDocx } from '../utils/cloudmersive'
+import { TemplateService } from './template'
 
 export enum TemplateType {
   DOCX,
@@ -48,7 +49,7 @@ export class TemplateInstanceService {
         return [false, new Error('template not found')]
       }
 
-      const course = await this.templateModel.findOne(courseId)
+      const course = await this.courseModel.findOne(courseId)
       if (!course) {
         return [false, new Error('course not found')]
       }
@@ -192,6 +193,9 @@ export class TemplateInstanceService {
     return instances
   }
 
+  @Inject()
+  private templateService: TemplateService
+
   async copyInstance({
     instanceId,
     courseId,
@@ -199,18 +203,31 @@ export class TemplateInstanceService {
   }: CopyTemplateInstance): Promise<[boolean, any]> {
     const instance = await this.templateInstanceModel.findOne(instanceId)
     if (!instance) return [false, new Error('instance not found')]
+
+    let tags = await this.templateService._innerBaseTagsReplace(
+      JSON.parse(instance.tags)
+    )
+    tags = await this.templateService._infoBaseTagsReplace(
+      tags,
+      tags.templateId,
+      courseId
+    )
     const newInstance = this.templateInstanceModel.create({
       ...instance,
+      tags: JSON.stringify(tags),
       courseId: courseId,
       name,
     })
 
     delete newInstance['id']
+    delete newInstance['excelId']
+    delete newInstance['createAt']
+    delete newInstance['updateAt']
 
     try {
       await this.templateInstanceModel.insert(newInstance)
     } catch (e: any) {
-      return [false, e]
+      return [false, new Error('该课程已经绑定文档实例，请先删除')]
     }
     return [true, newInstance.id]
   }
@@ -343,7 +360,7 @@ export class TemplateInstanceService {
     const tmpFilename = `xlsx${generaFileId()}`
     await writeFileToDisk(tmpFilename, file, 'temp')
 
-    const fileDir = path.join('template', tmpFilename)
+    const fileDir = path.join('temp', tmpFilename)
     const workbook = xlsx.readFile(fileDir)
     unlinkSync(fileDir)
     const data = xlsx.utils.sheet_to_json(

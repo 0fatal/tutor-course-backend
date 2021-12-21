@@ -28,8 +28,8 @@ export class UpdateTemplateInstanceDTO {
   @Rule(RuleType.object())
   tags: any
 
-  @Rule(RuleType.string().optional().length(36))
-  excelId: string
+  @Rule(RuleType.string().length(36).allow(null))
+  excelId: string | null
 
   @Rule(RuleType.string().optional().min(2).max(64))
   name: string

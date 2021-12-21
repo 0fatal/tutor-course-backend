@@ -184,23 +184,23 @@ export class TemplateService {
 
     const replaceMap = {
       beginSchoolYear() {
-        return course.beginYear
+        return course?.beginYear
       },
 
       endSchoolYear() {
-        return course.endYear
+        return course?.endYear
       },
 
       semester() {
-        return course.semester
+        return course?.semester
       },
 
       credit() {
-        return course.credit
+        return course?.credit
       },
 
       nature() {
-        return course.courseNature.name
+        return course?.courseNature.name
       },
 
       courseNature() {
@@ -212,10 +212,13 @@ export class TemplateService {
       },
 
       courseName() {
-        return course.courseName
+        return course?.courseName
       },
 
       courseCode() {
+        if (!course) {
+          return null
+        }
         const { beginYear, endYear, semester } = course
         return `(${beginYear}-${endYear}-${semester})-${course.courseNum}-`
       },
@@ -223,7 +226,7 @@ export class TemplateService {
     const keys = Object.keys(tags)
     for (const [k, v] of Object.entries(replaceMap)) {
       if (keys.includes(k)) {
-        tags[k] = v()
+        tags[k] = v() || tags[k]
       }
     }
     return tags
