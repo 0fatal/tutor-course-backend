@@ -16,6 +16,9 @@ export class NewTemplateInstanceDTO {
 
   @Rule(RuleType.string().length(36))
   courseId: string
+
+  @Rule(RuleType.string().optional().length(36))
+  excelId: string
 }
 
 export class UpdateTemplateInstanceDTO {

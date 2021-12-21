@@ -40,6 +40,7 @@ export class TemplateInstanceService {
     staffId,
     courseId,
     name,
+    excelId,
   }: NewTemplateInstanceDTO): Promise<[boolean, any]> {
     try {
       const template = await this.templateModel.findOne(templateId)
@@ -59,6 +60,7 @@ export class TemplateInstanceService {
         staffId,
         name,
         courseId,
+        excelId,
         tags: JSON.stringify(tags),
       }
 
@@ -356,6 +358,7 @@ export class TemplateInstanceService {
       name: file.filename,
       staffId,
       courseId,
+      excelId: null,
     })
   }
 }
