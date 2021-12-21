@@ -65,6 +65,10 @@ export class TemplateInstanceService {
         tags: JSON.stringify(tags),
       }
 
+      if (courseId === null) {
+        instance = { ...instance, excelS: generaFileId() }
+      }
+
       await this.templateInstanceModel.insert(
         this.templateInstanceModel.create(instance)
       )
@@ -350,7 +354,6 @@ export class TemplateInstanceService {
   async uploadExcelAndSaveToInstance(
     tid: string,
     staffId: string,
-    courseId: string,
     file: FileStream
   ): Promise<[boolean, any]> {
     const template = await this.templateModel.findOne(tid)
@@ -374,7 +377,7 @@ export class TemplateInstanceService {
       templateId: tid,
       name: file.filename,
       staffId,
-      courseId,
+      courseId: null,
       excelId: null,
     })
   }
