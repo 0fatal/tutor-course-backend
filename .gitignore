@@ -15,3 +15,4 @@ run/
 .tsbuildinfo.*
 temp/
 template/
+TODO.md
