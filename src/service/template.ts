@@ -195,6 +195,18 @@ export class TemplateService {
         return course.semester
       },
 
+      credit() {
+        return course.credit
+      },
+
+      nature() {
+        return course.courseNature.name
+      },
+
+      courseNature() {
+        return this.nature()
+      },
+
       teacherName() {
         return teacher.name
       },
