@@ -16,9 +16,7 @@ export class CourseService {
   courseRepository: Repository<Course>
 
   async findByCourseId(courseId: string): Promise<Course> {
-    return await this.courseRepository.findOne(courseId, {
-      relations: ['course_nature'],
-    })
+    return await this.courseRepository.findOne(courseId)
   }
 
   async findAll(): Promise<Course[]> {
@@ -34,7 +32,6 @@ export class CourseService {
         'courseState',
         'courseNature',
       ],
-      relations: ['course_nature'],
     })
   }
 
@@ -61,9 +58,7 @@ export class CourseService {
     courseId,
     courseState,
   }: UpdateCourseState): Promise<boolean> {
-    const course = await this.courseRepository.findOne(courseId, {
-      relations: ['course_nature'],
-    })
+    const course = await this.courseRepository.findOne(courseId)
     console.log(courseState)
     if (course) {
       return (
