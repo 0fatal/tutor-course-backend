@@ -66,7 +66,11 @@ export class TemplateInstanceService {
       }
 
       if (courseId === null) {
-        instance = { ...instance, excelS: generaFileId() }
+        instance = {
+          ...instance,
+          excelS: generaFileId(),
+          type: TemplateType.EXCEL,
+        }
       }
 
       await this.templateInstanceModel.insert(
