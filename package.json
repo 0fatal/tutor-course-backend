@@ -54,7 +54,7 @@
     "ci": "npm run cov",
     "build": "midway-bin build -c",
     "check": "luckyeye",
-    "online": "egg-scripts start --title=my-midway-project --framework=@midwayjs/web"
+    "online": "egg-scripts start --title=course_home --framework=@midwayjs/web"
   },
   "midway-bin-clean": [
     ".vscode/.tsbuildinfo",

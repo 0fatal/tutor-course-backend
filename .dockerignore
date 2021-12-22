@@ -17,4 +17,3 @@ temp/
 template/
 TODO.md
 *.config.dev.ts
-orm.config.ts
