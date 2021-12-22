@@ -18,9 +18,9 @@ export default (appInfo: EggAppInfo) => {
     replaceEggLogger: true,
   }
 
-  // config.security = {
-  //   csrf: false,
-  // };
+  config.security = {
+    csrf: false,
+  };
 
   config.multipart = {
     mode: 'stream',
