@@ -30,7 +30,7 @@ export default (appInfo: EggAppInfo) => {
 
   config.cors = {
     // {string|Function} origin: '*',
-    origin: 'http://localhost:8081',
+    origin: 'https://template.zacharywin.top',
     // {string|Array} allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
     credentials: true,
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
