@@ -66,7 +66,7 @@ export class TeacherController {
   @Validate()
   async registry(@Body(ALL) data: RegistryTeacherDTO): Promise<R> {
     const [ok, err] = await this._teacherService.registry(data)
-    if (!ok) return R.Fail().Msg(err ?? 'registry fail')
+    if (!ok) return R.Fail().Msg(err || 'registry fail')
     return R.Ok()
   }
 
@@ -75,7 +75,7 @@ export class TeacherController {
   async changePassword(@Body(ALL) data: UpdatePasswordDTO): Promise<R> {
     data.staffId = this.ctx['teacher'].staffId
     const [ok, err] = await this._teacherService.changePassword(data)
-    if (!ok) return R.Fail().Msg(err.message ?? 'change password fail')
+    if (!ok) return R.Fail().Msg(err.message || 'change password fail')
     return R.Ok()
   }
 }
