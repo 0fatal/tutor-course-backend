@@ -11,6 +11,8 @@ RUN npm run build
 FROM node:14-alpine
 
 WORKDIR /app
+RUN mkdir  /app/temp
+RUN mkdir  /app/template
 
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/bootstrap.js ./

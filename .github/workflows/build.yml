@@ -23,3 +23,16 @@ jobs:
           push: true
           tags: |
             zacharywin/course_home:latest
+      - name: executing remote ssh commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SECRET }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script: |
+            sudo docker pull zacharywin/course_home
+            sudo docker stop course_home
+            sudo docker rm course_home
+            sudo docker run -itd -p 7001:7001 --name=course_home --restart=always -v ~/prod/course_home/temp:/app/temp -v ~/prod/course_home/template:/app/temp:/app/template zacharywin/course_home
+
