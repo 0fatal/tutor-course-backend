@@ -280,7 +280,7 @@ export class TemplateInstanceService {
       unlinkSync(excelTmpPath)
     }
 
-    return [true, tmpPath]
+    return [true, {filepath:tmpPath, name: instance.name}]
   }
 
   async listEXCELInstance(

@@ -135,12 +135,14 @@ export class TemplateInstanceController {
       fallback: true,
       type: 'attachment', // [string] attachment/inline
     })
-    const stats = statSync(res)
+    const stats = statSync(res.filepath)
     this.ctx.response.set({
       'Content-Type': 'application/octet-stream',
-      'Content-Disposition': `attachment; filename=${iid}`,
+      'Content-Disposition': `attachment; filename=${encodeURIComponent(
+        res.name
+      )};filename*=utf-8''${encodeURIComponent(res.name)}"`,
       'Content-Length': stats.size.toString(),
     })
-    this.ctx.body = createReadStream(res)
+    this.ctx.body = createReadStream(res.filepath)
   }
 }
