@@ -53,7 +53,8 @@
     "lint:fix": "mwts fix",
     "ci": "npm run cov",
     "build": "midway-bin build -c",
-    "check": "luckyeye"
+    "check": "luckyeye",
+    "online": "egg-scripts start --title=my-midway-project --framework=@midwayjs/web"
   },
   "midway-bin-clean": [
     ".vscode/.tsbuildinfo",
