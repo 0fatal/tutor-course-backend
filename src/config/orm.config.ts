@@ -1,6 +1,6 @@
 export const orm = {
   type: 'mysql',
-  host: '0.0.0.0',
+  host: '172.18.0.1',
   port: 3306,
   username: 'course_manager',
   password: 'hJ68WPMhCaK7BfeTr',
