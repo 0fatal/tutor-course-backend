@@ -16,7 +16,7 @@ export class CourseTemplateService {
 
   async listCourseTemplate(isAll = false): Promise<CourseTemplate[]> {
     const selectCondition: Partial<CourseTemplate> | undefined = isAll
-      ? undefined
+      ? {}
       : { courseState: 1 }
     const res = await this.courseTemplateRepository.find({
       where: selectCondition,

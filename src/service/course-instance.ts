@@ -104,7 +104,7 @@ export class CourseInstanceService {
     } catch (e) {
       throw ErrorType.wrap(
         CourseInstanceErrorMap['CREATE_COURSE_INSTANCE_ERROR'],
-        e.message
+        '课程实例已存在，只能编辑'
       )
     }
     return true
