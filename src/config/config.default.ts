@@ -20,7 +20,7 @@ export default (appInfo: EggAppInfo) => {
 
   config.security = {
     csrf: false,
-  };
+  }
 
   config.multipart = {
     mode: 'stream',
