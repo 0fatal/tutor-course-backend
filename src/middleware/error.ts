@@ -10,7 +10,7 @@ export class ErrorMiddleware implements IWebMiddleware {
       try {
         await next()
       } catch (err) {
-        console.log(err)
+        console.error(err)
         if (err?.details?.[0].type === 'any.required') {
           ctx.status = 200
           ctx.body = R.Fail().Msg(err.message)
