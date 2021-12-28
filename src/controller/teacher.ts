@@ -53,7 +53,7 @@ export class TeacherController {
     return R.Ok()
   }
 
-  @Get('/')
+  @Get('/', { middleware: ['mustAdmin'] })
   async getInfo(ctx: Context): Promise<R> {
     const staffId = ctx['teacher'].staffId
     const teacher = await this._teacherService.findByStaffId(staffId)
