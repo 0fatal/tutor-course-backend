@@ -1,5 +1,5 @@
 import { Rule, RuleType } from '@midwayjs/decorator'
-import { CourseState } from '../../entity/course'
+import { CourseState } from '../../entity/course-template'
 
 export class CreateCourseTemplateDTO {
   @Rule(RuleType.string().min(2).max(20).required())
@@ -13,8 +13,8 @@ export class CreateCourseTemplateDTO {
 }
 
 export class UpdateCourseTemplateDTO {
-  @Rule(RuleType.string().required().length(36))
-  courseId: string
+  @Rule(RuleType.string().length(36).required())
+  courseTemplateId: string
 
   @Rule(RuleType.string().min(2).max(20).optional())
   courseName: string

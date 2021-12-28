@@ -21,7 +21,7 @@ export class CourseInstanceService {
   async findByInstanceId(instanceId: string): Promise<QueryCourseInstanceDTO> {
     const data = await this.courseInstanceRepository.findOne(instanceId)
     const { courseName, credit, courseCode, courseNature, createAt, updateAt } =
-      await this.courseTemplateRepository.findOne(data.courseId)
+      await this.courseTemplateRepository.findOne(data.courseTemplateId)
     const result: QueryCourseInstanceDTO = {
       ...data,
       courseName,
@@ -37,7 +37,7 @@ export class CourseInstanceService {
   async findAll(staffId: string): Promise<QueryCourseInstanceDTO[]> {
     const data = await this.courseInstanceRepository.find({
       select: [
-        'instanceId',
+        'courseTemplateId',
         'courseId',
         'classroom',
         'classTime',
@@ -59,7 +59,7 @@ export class CourseInstanceService {
         courseNature,
         createAt,
         updateAt,
-      } = await this.courseTemplateRepository.findOne(item.courseId)
+      } = await this.courseTemplateRepository.findOne(item.courseTemplateId)
       result.push({
         ...item,
         courseName,
@@ -75,7 +75,7 @@ export class CourseInstanceService {
 
   async update(course: UpdateCourseInstanceDTO): Promise<boolean> {
     try {
-      await this.courseInstanceRepository.update(course.instanceId, course)
+      await this.courseInstanceRepository.update(course.courseId, course)
     } catch (e: any) {
       throw ErrorType.wrap(
         CourseInstanceErrorMap['UPDATE_COURSE_INSTANCE_ERROR'],

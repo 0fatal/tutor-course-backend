@@ -40,7 +40,9 @@ export class CourseTemplateController {
 
   @Get('/')
   async listCourseTemplate(): Promise<R> {
-    const list = await this.courseTemplateService.listCourseTemplate()
+    const list = await this.courseTemplateService.listCourseTemplate(
+      !!this.ctx.teacher.isAdmin
+    )
     return R.Ok().Data(list)
   }
 

@@ -9,10 +9,10 @@ import {
 @EntityModel('course_instance')
 export class CourseInstance {
   @PrimaryGeneratedColumn('uuid')
-  instanceId: string
+  courseId: string
 
   @Column()
-  courseId: string
+  courseTemplateId: string
 
   @Column({ comment: '教师', nullable: false })
   classroom: string

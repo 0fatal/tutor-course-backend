@@ -6,10 +6,17 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+// CourseState 开课状态
+// 0：未开课，1：开课
+export enum CourseState {
+  DISABLE = 0,
+  ABLE = 1,
+}
+
 @EntityModel('course_template')
 export class CourseTemplate {
   @PrimaryGeneratedColumn('uuid')
-  courseId: string
+  courseTemplateId: string
 
   @Column()
   courseName: string
@@ -17,11 +24,17 @@ export class CourseTemplate {
   @Column()
   credit: number
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 10,
+    nullable: false,
+    comment: '课程号',
+    unique: true,
+  })
   courseCode: string
 
   @Column()
-  courseState: number
+  courseState: CourseState
 
   @Column()
   courseNature: string
