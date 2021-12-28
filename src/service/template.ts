@@ -209,8 +209,20 @@ export class TemplateService {
         return courseTemplate?.courseNature
       },
 
+      classTime() {
+        return course?.classTime
+      },
+
+      courseTime() {
+        return course?.classTime
+      },
+
+      classroom() {
+        return course?.classroom
+      },
+
       courseNature() {
-        return this.nature()
+        return courseTemplate?.courseNature
       },
 
       teacherName() {
