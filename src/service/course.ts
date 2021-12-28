@@ -47,7 +47,7 @@ export class CourseService {
   async newCourse(course: NewCourseDTO): Promise<boolean> {
     try {
       const newCourse = this.courseRepository.create(course)
-      await this.courseRepository.save(newCourse)
+      await this.courseRepository.insert(newCourse)
     } catch (e) {
       throw ErrorType.wrap(CourseErrorMap['CREATE_COURSE_ERROR'], e.message)
     }
