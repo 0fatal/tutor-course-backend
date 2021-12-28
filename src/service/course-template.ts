@@ -24,6 +24,11 @@ export class CourseTemplateService {
     return res
   }
 
+  async getCourseTemplate(templateCourseId: string): Promise<CourseTemplate> {
+    const res = await this.courseTemplateRepository.findOne(templateCourseId)
+    return res
+  }
+
   async createCourseTemplate(data: CreateCourseTemplateDTO) {
     try {
       const courseTemplate = this.courseTemplateRepository.create(data)
