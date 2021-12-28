@@ -24,7 +24,7 @@ export class TemplateController {
   @Inject()
   ctx: Context
 
-  @Post('/upload')
+  @Post('/upload', { middleware: ['mustAdmin'] })
   async parse(ctx: Context, @Query('type') templateType: string): Promise<R> {
     const file = await ctx.getFileStream()
 
@@ -67,7 +67,7 @@ export class TemplateController {
     ctx.body = createReadStream(filepath)
   }
 
-  @Del('/:tid')
+  @Del('/:tid', { middleware: ['mustAdmin'] })
   async deleteTemplate(@Param('tid') tid: string): Promise<R> {
     const ifSuccess = await this._templateService.deleteTemplate(tid)
     return ifSuccess ? R.Ok() : R.Fail()
