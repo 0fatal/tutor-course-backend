@@ -46,6 +46,16 @@ export class CourseTemplateController {
     return R.Ok().Data(list)
   }
 
+  @Get('/:cid')
+  async getCourseTemplate(@Param('cid') courseTemplateId: string): Promise<R> {
+    const courseTemplate = await this.courseTemplateService.getCourseTemplate(
+      courseTemplateId
+    )
+    return courseTemplate
+      ? R.Ok().Data(courseTemplate)
+      : R.WrapError(CourseTemplateErrorMap.COURSE_NOT_FOUND)
+  }
+
   @Post('/', { middleware: ['mustAdmin'] })
   @Validate()
   async newCourseTemplate(
