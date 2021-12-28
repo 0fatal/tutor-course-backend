@@ -35,17 +35,26 @@ export class CourseTemplateService {
   }
 
   async updateCourseTemplate(data: UpdateCourseTemplateDTO): Promise<boolean> {
-    const course = await this.courseTemplateRepository.findOne(data.courseId)
+    const course = await this.courseTemplateRepository.findOne(
+      data.courseTemplateId
+    )
     if (course) {
       return (
-        (await this.courseTemplateRepository.update(data.courseId, data))
-          .affected === 1
+        (
+          await this.courseTemplateRepository.update(
+            data.courseTemplateId,
+            data
+          )
+        ).affected === 1
       )
     }
     throw ErrorType.wrap(CourseTemplateErrorMap.COURSE_NOT_FOUND)
   }
 
-  async removeCourseTemplate(courseId: string): Promise<boolean> {
-    return (await this.courseTemplateRepository.delete(courseId)).affected > 0
+  async removeCourseTemplate(courseTemplateId: string): Promise<boolean> {
+    return (
+      (await this.courseTemplateRepository.delete(courseTemplateId)).affected >
+      0
+    )
   }
 }

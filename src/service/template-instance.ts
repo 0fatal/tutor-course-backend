@@ -14,10 +14,11 @@ import { readFileSync, unlinkSync, writeFileSync } from 'fs'
 import path, { resolve } from 'path'
 import { FileStream } from '../../typings/app'
 import xlsx from 'xlsx'
-import { Course } from '../entity/course'
 import { generaFileId, writeFileToDisk } from '../utils/common'
 import { mergeDocumentDocx } from '../utils/cloudmersive'
 import { TemplateService } from './template'
+import { CourseInstance } from '../entity/course-instance'
+import { CourseInstanceService } from './course-instance'
 
 export enum TemplateType {
   DOCX,
@@ -32,8 +33,11 @@ export class TemplateInstanceService {
   @InjectEntityModel(TemplateInstance)
   templateInstanceModel: Repository<TemplateInstance>
 
-  @InjectEntityModel(Course)
-  courseModel: Repository<Course>
+  @InjectEntityModel(CourseInstance)
+  courseInstanceModel: Repository<CourseInstance>
+
+  @Inject()
+  courseInstanceService: CourseInstanceService
 
   async newInstance({
     templateId,
@@ -49,7 +53,7 @@ export class TemplateInstanceService {
         return [false, new Error('template not found')]
       }
 
-      const course = await this.courseModel.findOne(courseId)
+      const course = await this.courseInstanceModel.findOne(courseId)
       if (!course) {
         return [false, new Error('course not found')]
       }
@@ -165,9 +169,8 @@ export class TemplateInstanceService {
         const { templateName } = await this.templateModel.findOne(
           instance.templateId
         )
-        const { courseName, courseId } = await this.courseModel.findOne(
-          instance.courseId
-        )
+        const { courseName, courseId } =
+          await this.courseInstanceService.findByInstanceId(instance.courseId)
 
         console.log(instance.excelId)
         let excel = null
@@ -280,7 +283,7 @@ export class TemplateInstanceService {
       unlinkSync(excelTmpPath)
     }
 
-    return [true, {filepath:tmpPath, name: instance.name}]
+    return [true, { filepath: tmpPath, name: instance.name }]
   }
 
   async listEXCELInstance(
@@ -333,9 +336,8 @@ export class TemplateInstanceService {
         const { templateName } = await this.templateModel.findOne(
           instance.templateId
         )
-        const { courseName, courseId } = await this.courseModel.findOne(
-          instance.courseId
-        )
+        const { courseName, courseId } =
+          await this.courseInstanceService.findByInstanceId(instance.courseId)
 
         instances[i] = {
           id: instance.id,

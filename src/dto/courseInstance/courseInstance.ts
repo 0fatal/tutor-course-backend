@@ -5,7 +5,7 @@ import { CourseTemplate } from '../../entity/course-template'
 
 export class UpdateCourseInstanceDTO {
   @Rule(RuleType.string().length(36).required())
-  instanceId: string
+  courseId: string
 
   @Rule(RuleType.string().min(3).max(20).required())
   classroom: string
@@ -25,7 +25,7 @@ export class UpdateCourseInstanceDTO {
 
 export class NewCourseInstanceDTO {
   @Rule(RuleType.string().length(36).required())
-  courseId: string
+  courseTemplateId: string
 
   @Rule(RuleType.string().min(3).max(20).required())
   classroom: string
@@ -48,7 +48,7 @@ export class NewCourseInstanceDTO {
 
 export type QueryCourseInstanceDTO = Pick<
   CourseInstance,
-  | 'instanceId'
+  | 'courseTemplateId'
   | 'courseId'
   | 'classroom'
   | 'classTime'
