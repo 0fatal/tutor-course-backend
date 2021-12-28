@@ -30,7 +30,10 @@ export default (appInfo: EggAppInfo) => {
 
   config.cors = {
     // {string|Function} origin: '*',
-    origin: 'https://template.zacharywin.top',
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? 'https://template.zacharywin.top'
+        : 'http://localhost:8081',
     // {string|Array} allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
     credentials: true,
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
