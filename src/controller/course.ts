@@ -1,13 +1,13 @@
 import {
   ALL,
   Body,
-  Controller,
+  // Controller,
   Get,
   Inject,
   Param,
   Patch,
   Post,
-  Provide,
+  // Provide,
   Validate,
 } from '@midwayjs/decorator'
 import { Context } from '@midwayjs/web'
@@ -15,8 +15,8 @@ import { CourseService } from '../service/course'
 import { R } from '../utils/response'
 import { NewCourseDTO, UpdateCourseState } from '../dto/course/course'
 
-@Provide()
-@Controller('/course')
+// @Provide()
+// @Controller('/course')
 export class CourseController {
   @Inject()
   ctx: Context
