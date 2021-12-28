@@ -25,4 +25,7 @@ export class Teacher {
 
   @Column({ type: 'tinyint' })
   isAdmin: number
+
+  @Column({ type: 'tinyint' })
+  forbidden: number
 }

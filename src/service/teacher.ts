@@ -3,12 +3,15 @@ import { Teacher } from '../entity/teacher'
 import { Repository } from 'typeorm'
 import MD5 from 'crypto-js/md5'
 import {
+  AdminUpdateTeacherDTO,
   RegistryTeacherDTO,
   UpdatePasswordDTO,
   UpdateTeacherDTO,
 } from '../dto/teacher/teacher'
 import { Provide } from '@midwayjs/decorator'
 import { TeacherInfoDTO } from '../dto/teacher/teacher.response'
+import { TeacherErrorMap } from '../errorType/teacher'
+import { ErrorMap, ErrorType } from '../errorType/base'
 
 @Provide()
 export class TeacherService {
@@ -20,11 +23,27 @@ export class TeacherService {
     password: string
   ): Promise<Teacher> {
     password = MD5(password).toString()
-    return await this._teacherModel.findOne({
+    const teacher = await this._teacherModel.findOne({
       where: {
         staffId,
         password,
       },
+    })
+    if (teacher.isAdmin === 1) return teacher
+    if (teacher.forbidden) throw ErrorType.wrap(TeacherErrorMap.LOGIN_FORBIDDEN)
+    return teacher
+  }
+
+  async getTeacherList(): Promise<Teacher[]> {
+    return await this._teacherModel.find({
+      select: [
+        'staffId',
+        'name',
+        'createAt',
+        'updateAt',
+        'isAdmin',
+        'forbidden',
+      ],
     })
   }
 
@@ -33,6 +52,37 @@ export class TeacherService {
       select: ['staffId', 'name', 'isAdmin', 'createAt', 'updateAt'],
     })) as TeacherInfoDTO
     return teacher
+  }
+
+  async findByStaffIdPlus(staffId: string): Promise<Teacher> {
+    const teacher = await this._teacherModel.findOne(staffId)
+    if (!teacher) throw ErrorType.wrap(TeacherErrorMap.NOT_FOUND)
+    return teacher
+  }
+
+  async delete(staffId: string): Promise<boolean> {
+    const teacher = await this._teacherModel.findOne(staffId)
+    if (!teacher) throw ErrorType.wrap(TeacherErrorMap.NOT_FOUND)
+    if (teacher.isAdmin === 1)
+      throw ErrorType.wrap(ErrorMap.REQUEST_FORBIDDEN, '不能删除管理员账号')
+    return (await this._teacherModel.delete(staffId)).affected > 0
+  }
+
+  async changeForbiddenStatus(
+    staffId: string,
+    isForbidden: boolean
+  ): Promise<boolean> {
+    const teacher = await this._teacherModel.findOne(staffId)
+    if (!teacher) throw ErrorType.wrap(TeacherErrorMap.NOT_FOUND)
+    if (teacher.isAdmin === 1)
+      throw ErrorType.wrap(ErrorMap.REQUEST_FORBIDDEN, '不能封禁管理员')
+    return (
+      (
+        await this._teacherModel.update(staffId, {
+          forbidden: isForbidden ? 1 : 0,
+        })
+      ).affected > 0
+    )
   }
 
   async registry(info: RegistryTeacherDTO): Promise<[boolean, any]> {
@@ -59,6 +109,21 @@ export class TeacherService {
   async updateInfo(staffId: string, data: UpdateTeacherDTO): Promise<boolean> {
     try {
       const res = await this._teacherModel.update(staffId, data)
+      return res.affected === 1
+    } catch (e: any) {
+      console.log(e)
+      return false
+    }
+  }
+
+  async adminUpdateInfo(data: AdminUpdateTeacherDTO): Promise<boolean> {
+    try {
+      if (data.password) {
+        data.password = MD5(data.password).toString()
+      } else {
+        data.password = undefined
+      }
+      const res = await this._teacherModel.update(data.staffId, data)
       return res.affected === 1
     } catch (e: any) {
       console.log(e)

@@ -17,6 +17,17 @@ export class UpdateTeacherDTO {
   name: string
 }
 
+export class AdminUpdateTeacherDTO {
+  @Rule(RuleType.string().min(2).max(6).optional())
+  name: string
+
+  @Rule(RuleType.string().min(6).max(20).optional())
+  password: string
+
+  @Rule(RuleType.string().min(5).max(8).required())
+  staffId: string
+}
+
 export class LoginDTO {
   @Rule(RuleType.string().min(6).max(20).required())
   password: string
