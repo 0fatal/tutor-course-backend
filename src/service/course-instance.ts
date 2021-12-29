@@ -44,6 +44,7 @@ export class CourseInstanceService {
         'beginYear',
         'endYear',
         'semester',
+        'classNum',
       ],
       where: {
         staffId,

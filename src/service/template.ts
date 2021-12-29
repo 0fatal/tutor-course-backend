@@ -237,8 +237,8 @@ export class TemplateService {
         if (!course) {
           return null
         }
-        const { beginYear, endYear, semester } = course
-        return `(${beginYear}-${endYear}-${semester})-${courseTemplate.courseCode}-`
+        const { beginYear, endYear, semester, classNum } = course
+        return `(${beginYear}-${endYear}-${semester})-${courseTemplate.courseCode}-${classNum}`
       },
     }
     const keys = Object.keys(tags)
