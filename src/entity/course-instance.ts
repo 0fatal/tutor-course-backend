@@ -37,4 +37,7 @@ export class CourseInstance {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updateAt: Date
+
+  @Column({ comment: '教学班号' })
+  classNum: number
 }

@@ -21,6 +21,9 @@ export class UpdateCourseInstanceDTO {
 
   @Rule(RuleType.number().required())
   semester: number
+
+  @Rule(RuleType.number().required())
+  classNum: number
 }
 
 export class NewCourseInstanceDTO {
@@ -44,6 +47,9 @@ export class NewCourseInstanceDTO {
 
   @Rule(RuleType.number().required())
   semester: number
+
+  @Rule(RuleType.number().required())
+  classNum: number
 }
 
 export type QueryCourseInstanceDTO = Pick<
@@ -55,6 +61,7 @@ export type QueryCourseInstanceDTO = Pick<
   | 'beginYear'
   | 'endYear'
   | 'semester'
+  | 'classNum'
 > &
   Pick<
     CourseTemplate,
