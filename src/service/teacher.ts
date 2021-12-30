@@ -29,6 +29,7 @@ export class TeacherService {
         password,
       },
     })
+    if (!teacher) return null
     if (teacher.isAdmin === 1) return teacher
     if (teacher.forbidden) throw ErrorType.wrap(TeacherErrorMap.LOGIN_FORBIDDEN)
     return teacher
@@ -121,9 +122,11 @@ export class TeacherService {
       if (data.password) {
         data.password = MD5(data.password).toString()
       } else {
-        data.password = undefined
+        delete data['password']
       }
-      const res = await this._teacherModel.update(data.staffId, data)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { staffId, ...tmp } = data
+      const res = await this._teacherModel.update(data.staffId, tmp)
       return res.affected === 1
     } catch (e: any) {
       console.log(e)
