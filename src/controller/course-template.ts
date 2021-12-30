@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Provide,
+  Query,
   Validate,
 } from '@midwayjs/decorator'
 import { Context } from '@midwayjs/web'
@@ -39,9 +40,9 @@ export class CourseTemplateController {
   }
 
   @Get('/')
-  async listCourseTemplate(): Promise<R> {
+  async listCourseTemplate(@Query('m') manage: string): Promise<R> {
     const list = await this.courseTemplateService.listCourseTemplate(
-      !!this.ctx.teacher.isAdmin
+      !!manage && !!this.ctx.teacher.isAdmin
     )
     return R.Ok().Data(list)
   }
