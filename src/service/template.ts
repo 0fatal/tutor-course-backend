@@ -9,8 +9,9 @@ import { Template } from './../entity/template'
 import { getDocxTags, loadDocxFile } from './../utils/doc'
 import { TemplateType } from './template-instance'
 import { Teacher } from '../entity/teacher'
-import { Course } from '../entity/course'
 import dayjs from 'dayjs'
+import { CourseInstance } from '../entity/course-instance'
+import { CourseTemplate } from '../entity/course-template'
 
 @Provide()
 export class TemplateService {
@@ -170,8 +171,10 @@ export class TemplateService {
 
   @InjectEntityModel(Teacher)
   private teacherRepository: Repository<Teacher>
-  @InjectEntityModel(Course)
-  private courseRepository: Repository<Course>
+  @InjectEntityModel(CourseInstance)
+  private courseInstanceRepository: Repository<CourseInstance>
+  @InjectEntityModel(CourseTemplate)
+  private courseTemplateRepository: Repository<CourseTemplate>
 
   // 基于身份信息的变量替换
   async _infoBaseTagsReplace(
@@ -180,7 +183,10 @@ export class TemplateService {
     cid: string
   ): Promise<any> {
     const teacher = await this.teacherRepository.findOne(tid)
-    const course = await this.courseRepository.findOne(cid)
+    const course = await this.courseInstanceRepository.findOne(cid)
+    const courseTemplate =
+      course &&
+      (await this.courseTemplateRepository.findOne(course.courseTemplateId))
 
     const replaceMap = {
       beginSchoolYear() {
@@ -196,15 +202,27 @@ export class TemplateService {
       },
 
       credit() {
-        return course?.credit
+        return courseTemplate?.credit
       },
 
       nature() {
-        return course?.courseNature.name
+        return courseTemplate?.courseNature
+      },
+
+      classTime() {
+        return course?.classTime
+      },
+
+      courseTime() {
+        return course?.classTime
+      },
+
+      classroom() {
+        return course?.classroom
       },
 
       courseNature() {
-        return this.nature()
+        return courseTemplate?.courseNature
       },
 
       teacherName() {
@@ -212,15 +230,15 @@ export class TemplateService {
       },
 
       courseName() {
-        return course?.courseName
+        return courseTemplate?.courseName
       },
 
       courseCode() {
         if (!course) {
           return null
         }
-        const { beginYear, endYear, semester } = course
-        return `(${beginYear}-${endYear}-${semester})-${course.courseNum}-`
+        const { beginYear, endYear, semester, classNum } = course
+        return `(${beginYear}-${endYear}-${semester})-${courseTemplate.courseCode}-${classNum}`
       },
     }
     const keys = Object.keys(tags)

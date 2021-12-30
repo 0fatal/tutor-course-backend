@@ -62,10 +62,13 @@ export namespace ErrorType {
   }
 
   export function wrap(
-    error: ErrorDefineSingle,
+    err: ErrorDefineSingle,
     payload?: string
   ): ErrorDefineSingle {
-    if (payload) error.msg = `${error.msg}: ${payload}`
+    const error: ErrorDefineSingle = {
+      code: err.code,
+      msg: payload ? `${err.msg}：${payload}` : err.msg,
+    }
     return error
   }
 }

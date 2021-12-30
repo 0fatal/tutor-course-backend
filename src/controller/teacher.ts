@@ -3,16 +3,20 @@ import {
   ALL,
   Body,
   Controller,
+  Del,
   Get,
   Inject,
+  Param,
   Patch,
   Post,
   Provide,
+  Query,
   Validate,
 } from '@midwayjs/decorator'
 import { R } from '../utils/response'
 import { Context } from 'egg'
 import {
+  AdminUpdateTeacherDTO,
   LoginDTO,
   RegistryTeacherDTO,
   UpdatePasswordDTO,
@@ -44,11 +48,37 @@ export class TeacherController {
     return R.Ok().Msg('login success')
   }
 
+  @Get('/list', { middleware: ['mustAdmin'] })
+  async listTeacher() {
+    const teachers = await this._teacherService.getTeacherList()
+    return R.Ok().Data(teachers)
+  }
+
+  @Post('/forbidden/:tid', { middleware: ['mustAdmin'] })
+  async changeForbiddenStatus(
+    @Param('tid') tid,
+    @Query('f') isForbidden: string
+  ): Promise<R> {
+    const ok = await this._teacherService.changeForbiddenStatus(
+      tid,
+      isForbidden === '1'
+    )
+    return ok ? R.Ok() : R.Fail()
+  }
+
   @Patch('/')
   @Validate()
   async setInfo(ctx: Context, @Body(ALL) data: UpdateTeacherDTO): Promise<R> {
     const staffId = ctx['teacher'].staffId
     const ok = await this._teacherService.updateInfo(staffId, data)
+    if (!ok) return R.Fail().Msg('update info fail')
+    return R.Ok()
+  }
+
+  @Patch('/info', { middleware: ['mustAdmin'] })
+  @Validate()
+  async adminSetInfo(@Body(ALL) data: AdminUpdateTeacherDTO): Promise<R> {
+    const ok = await this._teacherService.adminUpdateInfo(data)
     if (!ok) return R.Fail().Msg('update info fail')
     return R.Ok()
   }
@@ -62,7 +92,21 @@ export class TeacherController {
     return R.Ok().Data(teacher)
   }
 
-  @Post('/registry')
+  @Get('/info/:tid', { middleware: ['mustAdmin'] })
+  async getTeacherInfo(@Param('tid') staffId: string): Promise<R> {
+    const teacher = await this._teacherService.findByStaffId(staffId)
+    if (!teacher) return R.WrapError(TeacherErrorMap['NOT_FOUND'])
+
+    return R.Ok().Data(teacher)
+  }
+
+  @Del('/:tid', { middleware: ['mustAdmin'] })
+  async deleteTeacher(@Param('tid') staffId: string): Promise<R> {
+    const ok = await this._teacherService.delete(staffId)
+    return ok ? R.Ok() : R.Fail()
+  }
+
+  @Post('/registry', { middleware: ['mustAdmin'] })
   @Validate()
   async registry(@Body(ALL) data: RegistryTeacherDTO): Promise<R> {
     const [ok, err] = await this._teacherService.registry(data)
@@ -76,6 +120,12 @@ export class TeacherController {
     data.staffId = this.ctx['teacher'].staffId
     const [ok, err] = await this._teacherService.changePassword(data)
     if (!ok) return R.Fail().Msg(err.message || 'change password fail')
+    return R.Ok()
+  }
+
+  @Post('/logout')
+  async logout() {
+    this.ctx.session.teacher = null
     return R.Ok()
   }
 }
